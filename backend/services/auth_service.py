@@ -1,5 +1,6 @@
 import os
 import jwt
+import uuid
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
