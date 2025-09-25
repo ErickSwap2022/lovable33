@@ -122,14 +122,14 @@ if __name__ == "__main__":
     
     # Test sequential requests
     print("🔄 Testing Sequential Requests...")
-    success_sequential = tester.run_multiple_tests(3, concurrent=False)
+    success_sequential = tester.run_multiple_tests(3, is_concurrent=False)
     
     # Reset results
     tester.results = []
     
     # Test concurrent requests
     print("\n🔄 Testing Concurrent Requests...")
-    success_concurrent = tester.run_multiple_tests(3, concurrent=True)
+    success_concurrent = tester.run_multiple_tests(3, is_concurrent=True)
     
     if success_sequential and success_concurrent:
         print("\n🎉 All tests passed!")
