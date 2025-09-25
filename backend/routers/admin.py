@@ -65,7 +65,7 @@ async def get_users(
 async def update_user_status(
     user_id: str,
     is_active: bool,
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Update user active status"""
