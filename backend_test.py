@@ -261,12 +261,12 @@ class LovableCloneAPITester:
     
     def test_ai_generate_tests(self):
         """Test AI test generation endpoint"""
-        data = {
+        params = {
             "code": "function add(a, b) { return a + b; }",
             "session_id": self.test_session_id
         }
         
-        response = self.make_request("POST", "/ai/generate-tests", data)
+        response = self.make_request("POST", "/ai/generate-tests", params=params)
         
         if response is None:
             self.log_result("AI Generate Tests", False, "Request failed")
