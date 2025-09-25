@@ -70,6 +70,9 @@ class AuthService:
         result = await self.db.users.insert_one(user_data)
         user_data["id"] = str(result.inserted_id)
         
+        # Remove the MongoDB ObjectId to avoid serialization issues
+        user_data.pop("_id", None)
+        
         return user_data
     
     async def authenticate_user(self, email: str, password: str):
