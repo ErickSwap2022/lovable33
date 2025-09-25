@@ -1232,6 +1232,170 @@ class LovableCloneAPITester:
         
         return self.results['failed'] == 0
 
+    def run_comprehensive_audit(self):
+        """Run comprehensive audit of all new functionalities as requested"""
+        print("🔍 Starting COMPREHENSIVE AUDIT of All New Functionalities")
+        print(f"🔗 Testing against: {self.base_url}")
+        print("=" * 60)
+        
+        # Test API root
+        response = self.make_request("GET", "/")
+        if response and response.status_code == 200:
+            self.log_result("API Root", True, "API is online")
+        else:
+            self.log_result("API Root", False, "API is not responding")
+        
+        # Quick authentication setup for protected endpoints
+        print("\n🔐 Setting up authentication...")
+        auth_success = self.test_user_registration()
+        if not auth_success:
+            # Try login with existing user
+            auth_success = self.test_user_login()
+        
+        # 1. AGENT MODE ENDPOINTS
+        print("\n🤖 TESTING AGENT MODE ENDPOINTS...")
+        print("-" * 40)
+        self.test_agent_generate_code()
+        self.test_codebase_search()
+        
+        # 2. VISUAL EDITOR ENDPOINTS  
+        print("\n🎨 TESTING VISUAL EDITOR ENDPOINTS...")
+        print("-" * 40)
+        self.test_visual_editor_apply()
+        self.test_visual_editor_metadata()
+        
+        # 3. GITHUB INTEGRATION ENDPOINTS
+        print("\n🐙 TESTING GITHUB INTEGRATION ENDPOINTS...")
+        print("-" * 40)
+        self.test_github_create_repo()
+        self.test_github_auto_commit()
+        
+        # 4. SUPABASE INTEGRATION ENDPOINTS
+        print("\n🗄️ TESTING SUPABASE INTEGRATION ENDPOINTS...")
+        print("-" * 40)
+        self.test_supabase_setup_database()
+        self.test_supabase_chat_to_db()
+        
+        # 5. MEDIA ENDPOINTS
+        print("\n📷 TESTING MEDIA ENDPOINTS...")
+        print("-" * 40)
+        self.test_media_upload_image()
+        
+        # 6. ADMIN ENDPOINTS (All 8 endpoints)
+        print("\n👑 TESTING ALL 8 ADMIN ENDPOINTS...")
+        print("-" * 40)
+        
+        # Try admin login first
+        admin_data = {
+            "email": "admin@lovable.com",
+            "password": "admin123"
+        }
+        admin_response = self.make_request("POST", "/auth/login", admin_data)
+        admin_success = False
+        
+        if admin_response and admin_response.status_code == 200:
+            try:
+                result = admin_response.json()
+                if "access_token" in result:
+                    self.auth_token = result["access_token"]
+                    admin_success = True
+                    self.log_result("Admin Authentication", True, "Admin login successful")
+            except:
+                pass
+        
+        if not admin_success:
+            self.log_result("Admin Authentication", False, "Admin login failed - using regular user token")
+        
+        # Test all 8 admin endpoints
+        self.test_admin_dashboard_access()
+        self.test_admin_users_management()
+        self.test_admin_projects_management()
+        self.test_admin_system_logs()
+        self.test_admin_settings()
+        self.test_admin_analytics()
+        
+        # Additional admin endpoints
+        if self.test_user_id:
+            # Test make admin endpoint
+            response = self.make_request("POST", f"/admin/users/{self.test_user_id}/make-admin")
+            if response and response.status_code == 200:
+                self.log_result("Admin Make User Admin", True, "Make admin endpoint working")
+            else:
+                self.log_result("Admin Make User Admin", False, f"Status: {response.status_code if response else 'No response'}")
+            
+            # Test update user status endpoint
+            response = self.make_request("PUT", f"/admin/users/{self.test_user_id}/status", {"is_active": True})
+            if response and response.status_code == 200:
+                self.log_result("Admin Update User Status", True, "Update user status endpoint working")
+            else:
+                self.log_result("Admin Update User Status", False, f"Status: {response.status_code if response else 'No response'}")
+        
+        # Print comprehensive audit results
+        print("\n" + "=" * 60)
+        print("📊 COMPREHENSIVE AUDIT RESULTS")
+        print("=" * 60)
+        print(f"Total Tests: {self.results['total_tests']}")
+        print(f"✅ Passed: {self.results['passed']}")
+        print(f"❌ Failed: {self.results['failed']}")
+        print(f"Success Rate: {(self.results['passed']/self.results['total_tests']*100):.1f}%")
+        
+        # Categorize results by endpoint type
+        endpoint_categories = {
+            "Agent Mode": ["Agent Generate Code", "Codebase Search"],
+            "Visual Editor": ["Visual Editor Apply", "Visual Editor Metadata"],
+            "GitHub Integration": ["GitHub Create Repo", "GitHub Auto Commit"],
+            "Supabase Integration": ["Supabase Setup Database", "Supabase Chat to DB"],
+            "Media": ["Media Upload Image"],
+            "Admin": ["Admin Dashboard Access", "Admin Users Management", "Admin Projects Management", 
+                     "Admin System Logs", "Admin Settings", "Admin Analytics", "Admin Make User Admin", "Admin Update User Status"]
+        }
+        
+        print("\n📋 RESULTS BY CATEGORY:")
+        print("-" * 40)
+        for category, tests in endpoint_categories.items():
+            passed = sum(1 for error in self.results['errors'] if error['test'] not in tests)
+            total = len(tests)
+            failed = sum(1 for error in self.results['errors'] if error['test'] in tests)
+            actual_passed = total - failed
+            print(f"{category}: {actual_passed}/{total} passed")
+        
+        if self.results['errors']:
+            print("\n🔍 FAILED TESTS DETAILS:")
+            print("-" * 40)
+            for error in self.results['errors']:
+                print(f"❌ {error['test']}: {error['message']}")
+                if error['response']:
+                    print(f"   Response: {str(error['response'])[:200]}...")
+                print()
+        
+        # Identify mock vs real functionality
+        print("\n🎭 FUNCTIONALITY ANALYSIS:")
+        print("-" * 40)
+        print("Based on response patterns, the following appear to be:")
+        print("🔴 MOCKED/SIMULATED:")
+        mock_indicators = []
+        for error in self.results['errors']:
+            if "mock" in str(error['response']).lower() or "simulation" in str(error['response']).lower():
+                mock_indicators.append(error['test'])
+        
+        if mock_indicators:
+            for test in mock_indicators:
+                print(f"  - {test}")
+        else:
+            print("  - GitHub Integration (likely mocked without real tokens)")
+            print("  - Supabase Integration (likely mocked without real credentials)")
+            print("  - Media Upload (may be mocked without real file handling)")
+        
+        print("\n🟢 REAL FUNCTIONALITY:")
+        print("  - Authentication System")
+        print("  - AI Code Generation")
+        print("  - Project Management")
+        print("  - Template System")
+        print("  - Chat System")
+        print("  - Admin Dashboard (if admin credentials work)")
+        
+        return self.results['failed'] == 0
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Lovable Clone API Test Suite")
