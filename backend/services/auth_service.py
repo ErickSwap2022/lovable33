@@ -52,6 +52,9 @@ class AuthService:
     
     async def get_user_by_id(self, user_id: str):
         user = await self.db.users.find_one({"id": user_id})
+        if user and "_id" in user:
+            user["id"] = str(user["_id"])
+            user.pop("_id", None)
         return user
     
     async def create_user(self, user_data: dict):
