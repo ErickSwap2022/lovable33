@@ -3,10 +3,13 @@
 Test admin service directly
 """
 
+import sys
+sys.path.append('/app/backend')
+
 import asyncio
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
-from backend.services.admin_service import AdminService
+from services.admin_service import AdminService
 
 async def test_admin_service():
     # MongoDB connection
