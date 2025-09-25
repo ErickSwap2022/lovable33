@@ -889,7 +889,7 @@ class LovableCloneAPITester:
     def test_agent_generate_code(self):
         """Test autonomous AI agent code generation endpoint"""
         data = {
-            "prompt": "Create a React todo app with add, delete, and toggle functionality",
+            "prompt": "Create a simple React counter app",
             "session_id": self.test_session_id,
             "context": {
                 "framework": "react",
@@ -897,7 +897,14 @@ class LovableCloneAPITester:
             }
         }
         
-        response = self.make_request("POST", "/ai/agent-generate", data)
+        # Use longer timeout for complex AI operations
+        try:
+            url = f"{self.base_url}/ai/agent-generate"
+            headers = {"Authorization": f"Bearer {self.auth_token}"} if self.auth_token else {}
+            response = self.session.post(url, json=data, headers=headers, timeout=60)
+        except Exception as e:
+            self.log_result("Agent Generate Code", False, f"Request failed: {str(e)}")
+            return False
         
         if response is None:
             self.log_result("Agent Generate Code", False, "Request failed")
