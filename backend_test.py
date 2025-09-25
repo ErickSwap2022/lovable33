@@ -232,12 +232,12 @@ class LovableCloneAPITester:
     
     def test_ai_improve_code(self):
         """Test AI code improvement endpoint"""
-        data = {
+        params = {
             "code": "function hello() { console.log('hello'); }",
             "session_id": self.test_session_id
         }
         
-        response = self.make_request("POST", "/ai/improve-code", data)
+        response = self.make_request("POST", "/ai/improve-code", params=params)
         
         if response is None:
             self.log_result("AI Improve Code", False, "Request failed")
