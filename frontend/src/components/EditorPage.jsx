@@ -4,6 +4,10 @@ import { Play, Code, Smartphone, Monitor, Share, Download, Settings } from "luci
 import ChatPanel from "./ChatPanel";
 import PreviewPanel from "./PreviewPanel";
 import CodePanel from "./CodePanel";
+import axios from "axios";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const EditorPage = () => {
   const location = useLocation();
@@ -14,6 +18,7 @@ const EditorPage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
+  const [sessionId] = useState(() => Date.now().toString());
 
   useEffect(() => {
     if (initialPrompt) {
@@ -25,16 +30,35 @@ const EditorPage = () => {
     setIsGenerating(true);
     setChatMessages(prev => [...prev, { type: "user", content: prompt }]);
     
-    // Simulate AI generation
-    setTimeout(() => {
-      const mockCode = generateMockCode(prompt);
-      setGeneratedCode(mockCode);
+    try {
+      // Call backend to generate code
+      const response = await axios.post(`${API}/generate-code`, {
+        prompt: prompt,
+        session_id: sessionId
+      });
+      
+      if (response.data.success) {
+        setGeneratedCode(response.data.code);
+        setChatMessages(prev => [...prev, { 
+          type: "assistant", 
+          content: response.data.message || "I've created your application! You can see the preview on the right and edit the code in the Code tab." 
+        }]);
+      } else {
+        throw new Error("Failed to generate code");
+      }
+    } catch (error) {
+      console.error("Error generating code:", error);
       setChatMessages(prev => [...prev, { 
         type: "assistant", 
-        content: "I've created your application! You can see the preview on the right and edit the code in the Code tab." 
+        content: "I'm having trouble generating your code right now. Please try again in a moment." 
       }]);
+      
+      // Fallback to mock code
+      const mockCode = generateMockCode(prompt);
+      setGeneratedCode(mockCode);
+    } finally {
       setIsGenerating(false);
-    }, 3000);
+    }
   };
 
   const generateMockCode = (prompt) => {
@@ -159,6 +183,7 @@ export default App;`;
           messages={chatMessages}
           onGenerate={handleGenerate}
           isGenerating={isGenerating}
+          sessionId={sessionId}
         />
 
         {/* Preview/Code Panel */}
