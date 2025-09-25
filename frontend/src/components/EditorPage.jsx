@@ -6,6 +6,8 @@ import PreviewPanel from "./PreviewPanel";
 import CodePanel from "./CodePanel";
 import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
+import AgentMode from "./AgentMode";
+import VisualEditor from "./VisualEditor";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
