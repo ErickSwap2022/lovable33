@@ -396,7 +396,7 @@ class ChatModeAgentService:
         return {
             "success": True,
             "type": "general_assistance",
-            "response": response.text
+            "response": response
         }
     
     def _extract_search_term(self, query: str) -> str:
