@@ -1501,13 +1501,20 @@ if __name__ == "__main__":
     
     tester = LovableCloneAPITester()
     
-    # Check if we should run admin tests specifically
-    if len(sys.argv) > 1 and sys.argv[1] == "admin":
-        print("🔐 Running Admin Authentication Tests Only")
-        success = tester.run_admin_tests()
+    # Check command line arguments
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "admin":
+            print("🔐 Running Admin Authentication Tests Only")
+            success = tester.run_admin_tests()
+        elif sys.argv[1] == "audit" or sys.argv[1] == "comprehensive":
+            print("🔍 Running Comprehensive Audit of All New Functionalities")
+            success = tester.run_comprehensive_audit()
+        else:
+            print("🚀 Running Full API Test Suite")
+            success = tester.run_all_tests()
     else:
-        print("🚀 Running Full API Test Suite")
-        success = tester.run_all_tests()
+        print("🔍 Running Comprehensive Audit (Default)")
+        success = tester.run_comprehensive_audit()
     
     if success:
         print("🎉 All tests passed!")
