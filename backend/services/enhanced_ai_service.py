@@ -238,7 +238,7 @@ Use modern testing patterns and best practices."""
                 api_key=self.api_key,
                 session_id=f"tests_{session_id}",
                 system_message=system_message
-            ).with_model("openai", "gpt-4o-mini")
+            ).with_model("anthropic", "claude-3-5-sonnet-20241022")
 
             user_message = UserMessage(text=f"Generate tests for this React component:\n\n{code}")
             response = await chat.send_message(user_message)
