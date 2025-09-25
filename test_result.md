@@ -654,12 +654,18 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Enhanced AI Service - 4-Phase Code Generation - NEEDS TIMEOUT OPTIMIZATION"
+    - "Chat Mode Agent Service - Query Processing - NEEDS TIMEOUT OPTIMIZATION"
+    - "Chat Mode Agent Service - Multi-Step Reasoning - NEEDS TIMEOUT OPTIMIZATION"
     - "Agent Mode - Autonomous Code Generation API - NEEDS DEBUGGING"
     - "Admin Update User Status API - NEEDS INVESTIGATION"
   stuck_tasks:
+    - "Enhanced AI Service - 4-Phase Code Generation"
+    - "Chat Mode Agent Service - Query Processing"
+    - "Chat Mode Agent Service - Multi-Step Reasoning"
     - "Agent Mode - Autonomous Code Generation API"
-  test_all: true
-  test_priority: "comprehensive_audit_completed"
+  test_all: false
+  test_priority: "new_enhanced_features_focus"
 
 agent_communication:
     - agent: "testing"
