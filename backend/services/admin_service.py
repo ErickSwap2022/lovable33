@@ -128,7 +128,8 @@ class AdminService:
         pipeline = [
             {
                 "$match": {
-                    "id": {"$exists": True}  # Only include users with UUID id field
+                    "id": {"$exists": True},  # Only include users with UUID id field
+                    "created_at": {"$exists": True}  # Only include users with created_at field
                 }
             },
             {
