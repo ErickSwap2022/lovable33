@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Loader } from "lucide-react";
+import axios from "axios";
 
-const ChatPanel = ({ messages, onGenerate, isGenerating }) => {
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+const ChatPanel = ({ messages, onGenerate, isGenerating, sessionId }) => {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
@@ -13,11 +17,31 @@ const ChatPanel = ({ messages, onGenerate, isGenerating }) => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (input.trim() && !isGenerating) {
-      onGenerate(input.trim());
+      const messageText = input.trim();
       setInput("");
+      
+      // Call the onGenerate function which handles both UI updates and API calls
+      onGenerate(messageText);
+    }
+  };
+
+  const handleChatMessage = async (messageText) => {
+    try {
+      // This is for additional chat messages (not code generation)
+      const response = await axios.post(`${API}/chat/${sessionId}`, {
+        type: "user",
+        content: messageText
+      });
+      
+      if (response.data.success) {
+        // Handle the response if needed
+        console.log("Chat message sent successfully");
+      }
+    } catch (error) {
+      console.error("Error sending chat message:", error);
     }
   };
 
@@ -85,6 +109,11 @@ const ChatPanel = ({ messages, onGenerate, isGenerating }) => {
             <Send className="w-4 h-4" />
           </button>
         </form>
+        
+        {/* Helper text */}
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          Session ID: {sessionId?.slice(0, 8)}...
+        </p>
       </div>
     </div>
   );
