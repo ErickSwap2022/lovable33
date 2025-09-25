@@ -459,7 +459,7 @@ class ChatModeAgentService:
         # Parse reasoning steps from response
         reasoning_steps = []
         step_pattern = r'Step \d+:.*?(?=Step \d+:|$)'
-        matches = re.findall(step_pattern, response.text, re.DOTALL)
+        matches = re.findall(step_pattern, response, re.DOTALL)
         
         for match in matches:
             reasoning_steps.append(match.strip())
@@ -469,7 +469,7 @@ class ChatModeAgentService:
             "type": "multi_step_reasoning",
             "problem": problem,
             "reasoning_steps": reasoning_steps,
-            "solution": response.text,
+            "solution": response,
             "analysis": f"Multi-step analysis completed with {len(reasoning_steps)} reasoning steps",
             "context_used": context
         }
