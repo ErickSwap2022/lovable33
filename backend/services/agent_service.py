@@ -420,6 +420,9 @@ class AgentService:
         
         response = await chat.send_message(UserMessage(text=search_prompt))
         
+        # Handle response - it might be a string or an object
+        response_text = response if isinstance(response, str) else getattr(response, 'text', str(response))
+        
         # For now, return simple search results
         # In a real implementation, this would use vector embeddings
         return [
