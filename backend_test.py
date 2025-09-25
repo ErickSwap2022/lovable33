@@ -13,7 +13,7 @@ import sys
 import os
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://prompt-coder-1.preview.emergentagent.com/api"
+BACKEND_URL = "https://devsage-2.preview.emergentagent.com/api"
 
 class LovableCloneAPITester:
     def __init__(self):
