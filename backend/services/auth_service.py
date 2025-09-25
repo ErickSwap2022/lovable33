@@ -53,10 +53,13 @@ class AuthService:
     
     async def get_user_by_id(self, user_id: str):
         user = await self.db.users.find_one({"id": user_id})
-        if user and "_id" in user:
-            user["id"] = str(user["_id"])
-            user.pop("_id", None)
-        return user
+        if user:
+            # Remove sensitive data and MongoDB ObjectId
+            user_response = user.copy()
+            user_response.pop("hashed_password", None)
+            user_response.pop("_id", None)
+            return user_response
+        return None
     
     async def create_user(self, user_data: dict):
         # Generate UUID for user
