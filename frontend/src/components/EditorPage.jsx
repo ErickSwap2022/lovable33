@@ -285,8 +285,13 @@ export default App;`;
               viewMode={viewMode}
               isLoading={isGenerating}
             />
-          ) : (
+          ) : activeTab === "code" ? (
             <CodePanel code={generatedCode} />
+          ) : (
+            <VisualEditor 
+              code={generatedCode}
+              onCodeChange={setGeneratedCode}
+            />
           )}
         </div>
       </div>
