@@ -96,7 +96,8 @@ class ChatModeAgentService:
         chat = LlmChat(
             api_key=self.api_key,
             session_id=f"debug_{session_id}",
-            system_message=system_message
+            system_message=system_message,
+            timeout=60  # 1 minute for debugging assistance
         ).with_model("anthropic", "claude-3-5-sonnet-20241022")
         
         debug_prompt = f"""
