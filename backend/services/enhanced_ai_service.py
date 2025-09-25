@@ -1,13 +1,15 @@
 import os
 import json
-import asyncio
-from typing import List, Dict, Any
-from dotenv import load_dotenv
-from emergentintegrations.llm.chat import LlmChat, UserMessage
-
-load_dotenv()
+import re
+from typing import Dict, List, Optional, Any
+from datetime import datetime
+from emergentintegrations import LlmChat, UserMessage, SystemMessage
 
 class EnhancedAIService:
+    """
+    Enhanced AI Service with EXTREME QUALITY code generation
+    Uses Claude's full capabilities for complete, production-ready applications
+    """
     def __init__(self):
         self.api_key = os.environ.get('EMERGENT_LLM_KEY')
         if not self.api_key:
