@@ -9,6 +9,7 @@ const HomePage = () => {
 
   const handleStartBuilding = () => {
     if (prompt.trim()) {
+      // Permite acesso ao editor mesmo sem autenticação
       navigate("/editor", { state: { prompt } });
     }
   };
