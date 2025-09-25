@@ -184,13 +184,14 @@ class AdminService:
         
         async for project in self.db.projects.aggregate(pipeline):
             owner = project["owner"][0] if project["owner"] else {}
+            generated_code = project.get("generated_code", "") or ""  # Handle None values
             projects.append(ProjectManagement(
                 id=project["id"],
                 name=project["name"],
                 owner_email=owner.get("email", "Unknown"),
                 created_at=project["created_at"],
                 updated_at=project["updated_at"],
-                code_length=len(project.get("generated_code", "")),
+                code_length=len(generated_code),
                 is_public=project.get("is_public", False),
                 initial_prompt=project.get("initial_prompt")
             ))
