@@ -886,6 +886,54 @@ class LovableCloneAPITester:
     # MAIN TEST RUNNER
     # =============================================================================
     
+    def run_admin_tests(self):
+        """Run admin-specific tests"""
+        print("🔐 Starting Admin Authentication Tests")
+        print(f"🔗 Testing against: {self.base_url}")
+        print("=" * 60)
+        
+        # Test API root
+        response = self.make_request("GET", "/")
+        if response and response.status_code == 200:
+            self.log_result("API Root", True, "API is online")
+        else:
+            self.log_result("API Root", False, "API is not responding")
+        
+        # Admin Authentication Tests
+        print("\n👑 Testing Admin Authentication...")
+        admin_login_success = self.test_admin_login()
+        
+        if admin_login_success:
+            print("\n🛠️ Testing Admin Dashboard and Management...")
+            self.test_admin_dashboard_access()
+            self.test_admin_users_management()
+            self.test_admin_projects_management()
+            self.test_admin_system_logs()
+            self.test_admin_settings()
+            self.test_admin_analytics()
+        else:
+            print("❌ Admin login failed - skipping admin endpoint tests")
+        
+        # Print final results
+        print("\n" + "=" * 60)
+        print("📊 ADMIN TEST RESULTS SUMMARY")
+        print("=" * 60)
+        print(f"Total Tests: {self.results['total_tests']}")
+        print(f"✅ Passed: {self.results['passed']}")
+        print(f"❌ Failed: {self.results['failed']}")
+        print(f"Success Rate: {(self.results['passed']/self.results['total_tests']*100):.1f}%")
+        
+        if self.results['errors']:
+            print("\n🔍 FAILED TESTS DETAILS:")
+            print("-" * 40)
+            for error in self.results['errors']:
+                print(f"❌ {error['test']}: {error['message']}")
+                if error['response']:
+                    print(f"   Response: {str(error['response'])[:200]}...")
+                print()
+        
+        return self.results['failed'] == 0
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Lovable Clone API Test Suite")
