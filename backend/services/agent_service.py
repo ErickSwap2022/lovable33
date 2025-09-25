@@ -296,7 +296,10 @@ class AgentService:
         
         response = await chat.send_message(UserMessage(text=fix_prompt))
         
-        return self._extract_code_from_response(response.text)
+        # Handle response - it might be a string or an object
+        response_text = response if isinstance(response, str) else getattr(response, 'text', str(response))
+        
+        return self._extract_code_from_response(response_text)
     
     async def _optimize_code(self, validation_result: Dict, session_id: str) -> Dict[str, Any]:
         """Optimize the code for performance and best practices"""
