@@ -49,7 +49,7 @@ Return ONLY valid React/TypeScript code without markdown formatting."""
                 api_key=self.api_key,
                 session_id=f"enhanced_code_{session_id}",
                 system_message=system_message
-            ).with_model("openai", "gpt-4o")
+            ).with_model("anthropic", "claude-3-5-sonnet-20241022")
 
             # Enhanced prompt with context
             enhanced_prompt = self._build_enhanced_prompt(prompt, context)
