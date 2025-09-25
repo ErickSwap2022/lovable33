@@ -659,6 +659,230 @@ class LovableCloneAPITester:
             return False
     
     # =============================================================================
+    # ADMIN AUTHENTICATION TESTS
+    # =============================================================================
+    
+    def test_admin_login(self):
+        """Test admin login with specific credentials"""
+        data = {
+            "email": "admin@lovable.com",
+            "password": "admin123"
+        }
+        
+        response = self.make_request("POST", "/auth/login", data)
+        
+        if response is None:
+            self.log_result("Admin Login", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "access_token" in result and "user" in result:
+                    self.auth_token = result["access_token"]
+                    self.test_user_id = result["user"]["id"]
+                    self.log_result("Admin Login", True, f"Admin login successful for: {result['user']['email']}")
+                    return True
+                else:
+                    self.log_result("Admin Login", False, "Missing access_token or user in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Admin Login", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Admin Login", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_admin_dashboard_access(self):
+        """Test admin dashboard endpoint access"""
+        if not self.auth_token:
+            self.log_result("Admin Dashboard Access", False, "No auth token available")
+            return False
+        
+        response = self.make_request("GET", "/admin/dashboard")
+        
+        if response is None:
+            self.log_result("Admin Dashboard Access", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "user_stats" in result and "project_stats" in result and "system_stats" in result:
+                    self.log_result("Admin Dashboard Access", True, "Admin dashboard data retrieved successfully")
+                    return True
+                else:
+                    self.log_result("Admin Dashboard Access", False, "Missing expected dashboard data", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Admin Dashboard Access", False, "Invalid JSON response", response.text)
+                return False
+        elif response.status_code == 403:
+            self.log_result("Admin Dashboard Access", False, "Access forbidden - user may not have admin privileges", response.text)
+            return False
+        elif response.status_code == 401:
+            self.log_result("Admin Dashboard Access", False, "Unauthorized - authentication failed", response.text)
+            return False
+        else:
+            self.log_result("Admin Dashboard Access", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_admin_users_management(self):
+        """Test admin users management endpoint"""
+        if not self.auth_token:
+            self.log_result("Admin Users Management", False, "No auth token available")
+            return False
+        
+        response = self.make_request("GET", "/admin/users")
+        
+        if response is None:
+            self.log_result("Admin Users Management", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, list):
+                    self.log_result("Admin Users Management", True, f"Retrieved {len(result)} users for management")
+                    return True
+                else:
+                    self.log_result("Admin Users Management", False, "Response is not a list", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Admin Users Management", False, "Invalid JSON response", response.text)
+                return False
+        elif response.status_code == 403:
+            self.log_result("Admin Users Management", False, "Access forbidden - user may not have admin privileges", response.text)
+            return False
+        else:
+            self.log_result("Admin Users Management", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_admin_projects_management(self):
+        """Test admin projects management endpoint"""
+        if not self.auth_token:
+            self.log_result("Admin Projects Management", False, "No auth token available")
+            return False
+        
+        response = self.make_request("GET", "/admin/projects")
+        
+        if response is None:
+            self.log_result("Admin Projects Management", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, list):
+                    self.log_result("Admin Projects Management", True, f"Retrieved {len(result)} projects for management")
+                    return True
+                else:
+                    self.log_result("Admin Projects Management", False, "Response is not a list", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Admin Projects Management", False, "Invalid JSON response", response.text)
+                return False
+        elif response.status_code == 403:
+            self.log_result("Admin Projects Management", False, "Access forbidden - user may not have admin privileges", response.text)
+            return False
+        else:
+            self.log_result("Admin Projects Management", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_admin_system_logs(self):
+        """Test admin system logs endpoint"""
+        if not self.auth_token:
+            self.log_result("Admin System Logs", False, "No auth token available")
+            return False
+        
+        response = self.make_request("GET", "/admin/logs")
+        
+        if response is None:
+            self.log_result("Admin System Logs", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, list):
+                    self.log_result("Admin System Logs", True, f"Retrieved {len(result)} system logs")
+                    return True
+                else:
+                    self.log_result("Admin System Logs", False, "Response is not a list", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Admin System Logs", False, "Invalid JSON response", response.text)
+                return False
+        elif response.status_code == 403:
+            self.log_result("Admin System Logs", False, "Access forbidden - user may not have admin privileges", response.text)
+            return False
+        else:
+            self.log_result("Admin System Logs", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_admin_settings(self):
+        """Test admin settings endpoint"""
+        if not self.auth_token:
+            self.log_result("Admin Settings", False, "No auth token available")
+            return False
+        
+        response = self.make_request("GET", "/admin/settings")
+        
+        if response is None:
+            self.log_result("Admin Settings", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, dict):
+                    self.log_result("Admin Settings", True, "Retrieved platform settings successfully")
+                    return True
+                else:
+                    self.log_result("Admin Settings", False, "Response is not a dict", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Admin Settings", False, "Invalid JSON response", response.text)
+                return False
+        elif response.status_code == 403:
+            self.log_result("Admin Settings", False, "Access forbidden - user may not have admin privileges", response.text)
+            return False
+        else:
+            self.log_result("Admin Settings", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_admin_analytics(self):
+        """Test admin analytics endpoint"""
+        if not self.auth_token:
+            self.log_result("Admin Analytics", False, "No auth token available")
+            return False
+        
+        response = self.make_request("GET", "/admin/analytics")
+        
+        if response is None:
+            self.log_result("Admin Analytics", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, dict) and "daily_users" in result:
+                    self.log_result("Admin Analytics", True, "Retrieved analytics data successfully")
+                    return True
+                else:
+                    self.log_result("Admin Analytics", False, "Missing expected analytics data", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Admin Analytics", False, "Invalid JSON response", response.text)
+                return False
+        elif response.status_code == 403:
+            self.log_result("Admin Analytics", False, "Access forbidden - user may not have admin privileges", response.text)
+            return False
+        else:
+            self.log_result("Admin Analytics", False, f"Status: {response.status_code}", response.text)
+            return False
+
+    # =============================================================================
     # MAIN TEST RUNNER
     # =============================================================================
     
