@@ -93,9 +93,12 @@ class AgentService:
         
         response = await chat.send_message(UserMessage(text=planning_prompt))
         
+        # Handle response - it might be a string or an object
+        response_text = response if isinstance(response, str) else getattr(response, 'text', str(response))
+        
         try:
             # Extract JSON from response
-            json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if json_match:
                 plan = json.loads(json_match.group())
             else:
