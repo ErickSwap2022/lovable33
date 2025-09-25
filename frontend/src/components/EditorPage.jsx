@@ -17,7 +17,7 @@ const EditorPage = () => {
   const initialPrompt = location.state?.prompt || "";
   const { isAuthenticated } = useAuth();
   
-  const [activeTab, setActiveTab] = useState("preview"); // preview, code
+  const [activeTab, setActiveTab] = useState("preview"); // preview, code, visual
   const [viewMode, setViewMode] = useState("desktop"); // desktop, mobile
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
