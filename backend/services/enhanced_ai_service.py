@@ -61,7 +61,7 @@ Return ONLY valid React/TypeScript code without markdown formatting."""
             code = self._clean_code_response(response)
             
             # Generate additional metadata
-            metadata = await self._generate_metadata(prompt, code, session_id)
+            metadata = await self.generate_metadata(prompt, code, session_id)
             
             return {
                 "code": code,
