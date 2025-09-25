@@ -5,7 +5,7 @@ import ast
 import re
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from emergentintegrations import LlmChat, UserMessage, SystemMessage
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 class AgentService:
     """
@@ -55,7 +55,7 @@ class AgentService:
     async def _create_development_plan(self, prompt: str, session_id: str, context: Optional[Dict] = None) -> Dict[str, Any]:
         """Create a detailed development plan before coding"""
         
-        system_message = SystemMessage(text="""You are an expert AI development planner. 
+        system_message = """You are an expert AI development planner. 
         Analyze the user request and create a detailed development plan.
         
         Your plan should include:
@@ -66,7 +66,7 @@ class AgentService:
         5. Technology stack recommendations
         6. Step-by-step implementation order
         
-        Return your analysis in JSON format.""")
+        Return your analysis in JSON format."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -121,7 +121,7 @@ class AgentService:
     async def _generate_code_with_analysis(self, prompt: str, plan: Dict, session_id: str) -> Dict[str, Any]:
         """Generate code with built-in analysis to prevent errors"""
         
-        system_message = SystemMessage(text="""You are an expert React developer with autonomous capabilities.
+        system_message = """You are an expert React developer with autonomous capabilities.
         Generate high-quality, error-free React code based on the provided plan.
         
         REQUIREMENTS:
@@ -139,7 +139,7 @@ class AgentService:
         4. Loading states and error states
         5. TypeScript-style JSDoc comments for clarity
         
-        Return ONLY the JavaScript code, no explanations.""")
+        Return ONLY the JavaScript code, no explanations."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -257,7 +257,7 @@ class AgentService:
     async def _auto_fix_issues(self, code: str, issues: List[Dict], session_id: str) -> str:
         """Automatically fix detected code issues"""
         
-        system_message = SystemMessage(text="""You are an expert code debugger and fixer.
+        system_message = """You are an expert code debugger and fixer.
         Fix the provided React code to resolve the detected issues.
         
         REQUIREMENTS:
@@ -268,7 +268,7 @@ class AgentService:
         - Add error handling if missing
         - Improve accessibility if needed
         
-        Return ONLY the fixed JavaScript code.""")
+        Return ONLY the fixed JavaScript code."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -297,7 +297,7 @@ class AgentService:
         
         code = validation_result["code"]
         
-        system_message = SystemMessage(text="""You are an expert React performance optimizer.
+        system_message = """You are an expert React performance optimizer.
         Analyze and optimize the provided code for:
         - Performance (memoization, lazy loading, etc.)
         - Best practices
@@ -305,7 +305,7 @@ class AgentService:
         - Accessibility
         - SEO if applicable
         
-        Return the optimized code and explain your optimizations.""")
+        Return the optimized code and explain your optimizations."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -386,10 +386,10 @@ class AgentService:
     async def codebase_search(self, query: str, codebase_files: List[Dict]) -> List[Dict]:
         """Intelligent search through codebase"""
         
-        system_message = SystemMessage(text="""You are an expert codebase analyzer.
+        system_message = """You are an expert codebase analyzer.
         Search through the provided codebase files and find relevant matches for the user's query.
         
-        Return matches with relevance scores and explanations.""")
+        Return matches with relevance scores and explanations."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -423,14 +423,14 @@ class AgentService:
     async def log_inspection(self, logs: List[str], context: str = "") -> Dict[str, Any]:
         """Automatically analyze logs for issues"""
         
-        system_message = SystemMessage(text="""You are an expert log analyzer.
+        system_message = """You are an expert log analyzer.
         Analyze the provided logs and identify:
         - Errors and warnings
         - Performance issues
         - Potential problems
         - Suggested fixes
         
-        Return structured analysis.""")
+        Return structured analysis."""
         
         chat = LlmChat(
             api_key=self.api_key,
