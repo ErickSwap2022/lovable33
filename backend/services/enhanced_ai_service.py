@@ -290,7 +290,8 @@ class EnhancedAIService:
         chat = LlmChat(
             api_key=self.api_key,
             session_id=f"generation_{session_id}",
-            system_message=system_message
+            system_message=system_message,
+            timeout=180  # 3 minutes for complete code generation
         ).with_model("anthropic", "claude-3-5-sonnet-20241022")
         
         generation_prompt = f"""
