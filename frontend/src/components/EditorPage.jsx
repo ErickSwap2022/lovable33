@@ -194,6 +194,17 @@ export default App;`;
                 <Code className="w-4 h-4 inline mr-1" />
                 Code
               </button>
+              <button
+                onClick={() => setActiveTab("visual")}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === "visual" 
+                    ? "bg-white shadow-sm text-gray-900" 
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Settings className="w-4 h-4 inline mr-1" />
+                Visual Editor
+              </button>
             </div>
           </div>
 
