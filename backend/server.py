@@ -18,6 +18,7 @@ from models.template import Template, TemplateCreate, TemplateResponse
 from models.project_extended import Project, ProjectCreate, ProjectUpdate, ProjectResponse, DeploymentRequest
 from models.project import ChatMessage, GenerateCodeRequest
 from models.admin import DashboardData, UserManagement, ProjectManagement, SystemLog, PlatformSettings
+from models.agent import AgentRequest, AgentResponse, VisualOperation, VisualEditRequest, GitHubRequest, SupabaseRequest, MediaUploadResponse
 
 # Import services
 from services.auth_service import AuthService
