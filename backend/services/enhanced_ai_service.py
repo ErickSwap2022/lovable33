@@ -173,7 +173,8 @@ class EnhancedAIService:
         chat = LlmChat(
             api_key=self.api_key,
             session_id=f"architecture_{datetime.now().timestamp()}",
-            system_message=system_message
+            system_message=system_message,
+            timeout=90  # 90 seconds for architecture design
         ).with_model("anthropic", "claude-3-5-sonnet-20241022")
         
         architecture_prompt = f"""
