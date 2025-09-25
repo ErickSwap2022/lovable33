@@ -80,6 +80,7 @@ projects_router = APIRouter(prefix="/projects", tags=["Projects"])
 templates_router = APIRouter(prefix="/templates", tags=["Templates"])
 ai_router = APIRouter(prefix="/ai", tags=["AI"])
 deploy_router = APIRouter(prefix="/deploy", tags=["Deployment"])
+admin_router = APIRouter(prefix="/admin", tags=["Admin"])
 
 # =============================================================================
 # AUTHENTICATION ROUTES
