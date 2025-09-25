@@ -111,7 +111,7 @@ class EnhancedAIService:
         response = await chat.send_message(UserMessage(text=analysis_prompt))
         
         try:
-            json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
             if json_match:
                 return json.loads(json_match.group())
         except:
