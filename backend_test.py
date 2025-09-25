@@ -1015,8 +1015,17 @@ class LovableCloneAPITester:
         return self.results['failed'] == 0
 
 if __name__ == "__main__":
+    import sys
+    
     tester = LovableCloneAPITester()
-    success = tester.run_all_tests()
+    
+    # Check if we should run admin tests specifically
+    if len(sys.argv) > 1 and sys.argv[1] == "admin":
+        print("🔐 Running Admin Authentication Tests Only")
+        success = tester.run_admin_tests()
+    else:
+        print("🚀 Running Full API Test Suite")
+        success = tester.run_all_tests()
     
     if success:
         print("🎉 All tests passed!")
