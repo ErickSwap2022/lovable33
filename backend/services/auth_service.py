@@ -59,6 +59,9 @@ class AuthService:
         return user
     
     async def create_user(self, user_data: dict):
+        # Generate UUID for user
+        user_data["id"] = str(uuid.uuid4())
+        
         # Hash password
         user_data["hashed_password"] = self.get_password_hash(user_data.pop("password"))
         
@@ -71,13 +74,13 @@ class AuthService:
             )
         
         # Create user
-        result = await self.db.users.insert_one(user_data)
-        user_data["id"] = str(result.inserted_id)
+        await self.db.users.insert_one(user_data)
         
-        # Remove the MongoDB ObjectId to avoid serialization issues
-        user_data.pop("_id", None)
+        # Return user data without sensitive info
+        user_response = user_data.copy()
+        user_response.pop("hashed_password", None)
         
-        return user_data
+        return user_response
     
     async def authenticate_user(self, email: str, password: str):
         user = await self.get_user_by_email(email)
