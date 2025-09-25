@@ -26,6 +26,11 @@ from services.template_service import TemplateService
 from services.deployment_service import DeploymentService
 from services.enhanced_ai_service import EnhancedAIService
 from services.admin_service import AdminService
+from services.agent_service import AgentService
+from services.supabase_service import SupabaseService
+from services.github_service import GitHubService
+from services.visual_editor_service import VisualEditorService
+from services.media_service import MediaService
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
