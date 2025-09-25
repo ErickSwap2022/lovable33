@@ -29,7 +29,7 @@ async def require_admin(current_user: User, admin_service: Any):
 
 @router.get("/dashboard", response_model=DashboardData)
 async def get_dashboard(
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Get admin dashboard data"""
