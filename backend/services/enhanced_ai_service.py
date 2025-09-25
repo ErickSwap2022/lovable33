@@ -340,7 +340,7 @@ class EnhancedAIService:
         response = await chat.send_message(UserMessage(text=generation_prompt))
         
         # Extract and clean the code
-        code = self._extract_and_clean_code(response.text)
+        code = self._extract_and_clean_code(response)
         
         return {
             "code": code,
