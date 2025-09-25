@@ -40,6 +40,7 @@ project_service = ProjectService(db)
 template_service = TemplateService(db)
 deployment_service = DeploymentService(db)
 ai_service = EnhancedAIService()
+admin_service = AdminService(db)
 
 # Security
 security = HTTPBearer(auto_error=False)
