@@ -9,6 +9,7 @@ import EditorPage from "./components/EditorPage";
 import TemplatesPage from "./components/TemplatesPage";
 import ProjectsPage from "./components/ProjectsPage";
 import ProfilePage from "./components/ProfilePage";
+import AdminPage from "./components/AdminPage";
 
 function App() {
   return (
