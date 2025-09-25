@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Query
 from typing import List, Optional, Any
-from services.admin_service import AdminService
-from services.auth_service import AuthService
 from models.admin import (
     DashboardData, UserManagement, ProjectManagement, 
     SystemLog, PlatformSettings
 )
 from models.user import User
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+router = APIRouter()
+
+# Dependencies will be injected by the main app
 
 async def require_admin(current_user: User, admin_service: Any):
     """Require admin privileges"""
