@@ -290,7 +290,7 @@ export default App;`;
           ) : (
             <VisualEditor 
               code={generatedCode}
-              onCodeChange={setGeneratedCode}
+              onCodeUpdate={setGeneratedCode}
             />
           )}
         </div>
