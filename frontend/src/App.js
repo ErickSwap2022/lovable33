@@ -38,6 +38,9 @@ function App() {
               </ProtectedRoute>
             } />
             
+            {/* Admin Route - Protected */}
+            <Route path="/admin" element={<AdminPage />} />
+            
             {/* Community Routes (Public but enhanced when authenticated) */}
             <Route path="/community" element={<div>Community Page - Coming Soon</div>} />
             <Route path="/pricing" element={<div>Pricing Page - Coming Soon</div>} />
