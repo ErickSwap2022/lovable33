@@ -144,7 +144,7 @@ Return a JSON object with:
                 api_key=self.api_key,
                 session_id=f"metadata_{session_id}",
                 system_message=system_message
-            ).with_model("openai", "gpt-4o-mini")
+            ).with_model("anthropic", "claude-3-5-sonnet-20241022")
 
             analysis_prompt = f"""Analyze this React component and generate metadata:
 
