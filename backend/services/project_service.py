@@ -14,6 +14,8 @@ class ProjectService:
     
     async def create_project(self, project_data: dict, owner_id: str) -> Project:
         """Create a new project"""
+        # Generate UUID for project
+        project_data["id"] = str(uuid.uuid4())
         project_data["owner_id"] = owner_id
         
         # If template_id is provided, get template code
@@ -37,8 +39,7 @@ class ProjectService:
             project_data["versions"] = [initial_version.dict()]
         
         project = Project(**project_data)
-        result = await self.db.projects.insert_one(project.dict())
-        project.id = str(result.inserted_id)
+        await self.db.projects.insert_one(project.dict())
         
         return project
     
