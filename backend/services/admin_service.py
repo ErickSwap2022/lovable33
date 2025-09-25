@@ -124,8 +124,13 @@ class AdminService:
         """Get users for management"""
         users = []
         
-        # Aggregate users with project counts
+        # Aggregate users with project counts - only include users with 'id' field
         pipeline = [
+            {
+                "$match": {
+                    "id": {"$exists": True}  # Only include users with UUID id field
+                }
+            },
             {
                 "$lookup": {
                     "from": "projects",
@@ -149,7 +154,7 @@ class AdminService:
                 id=user["id"],
                 email=user["email"],
                 username=user.get("username"),
-                created_at=user["created_at"],
+                created_at=user.get("created_at"),
                 last_login=user.get("last_login"),
                 projects_count=user["projects_count"],
                 is_active=user.get("is_active", True),
