@@ -368,6 +368,10 @@ async def get_chat_history(session_id: str):
             {"session_id": session_id}
         ).sort("timestamp", 1).to_list(100)
         
+        # Remove MongoDB ObjectId from messages
+        for message in messages:
+            message.pop("_id", None)
+        
         return {
             "success": True,
             "messages": messages
