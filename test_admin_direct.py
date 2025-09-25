@@ -27,6 +27,7 @@ async def test_admin_service():
             print(f"   - {user.email} (ID: {user.id})")
     except Exception as e:
         print(f"❌ Error in get_users_management: {e}")
+        print(f"Error type: {type(e)}")
         import traceback
         traceback.print_exc()
     
@@ -38,6 +39,7 @@ async def test_admin_service():
             print(f"   - {project.name} (Owner: {project.owner_email})")
     except Exception as e:
         print(f"❌ Error in get_projects_management: {e}")
+        print(f"Error type: {type(e)}")
         import traceback
         traceback.print_exc()
     
