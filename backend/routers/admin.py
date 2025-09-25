@@ -10,7 +10,7 @@ from models.user import User
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
-async def require_admin(current_user: User, admin_service: AdminService):
+async def require_admin(current_user: User, admin_service: Any):
     """Require admin privileges"""
     if not current_user:
         raise HTTPException(
