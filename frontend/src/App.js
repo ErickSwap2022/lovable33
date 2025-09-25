@@ -26,6 +26,7 @@ function App() {
             <Route path="/editor" element={<EditorPage />} />
             
             {/* Protected Routes */}
+            <Route path="/projects" element={
               <ProtectedRoute>
                 <ProjectsPage />
               </ProtectedRoute>
