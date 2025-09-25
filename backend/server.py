@@ -436,46 +436,153 @@ def get_admin_service():
 def get_current_user_for_admin(credentials = Depends(security)):
     return get_current_user(credentials)
 
+async def require_admin_access(current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    """Require admin privileges"""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required"
+        )
+    
+    is_admin = await admin_svc.is_admin(current_user["id"])
+    if not is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required"
+        )
+    
+    return current_user
+
 # Add admin routes with proper dependencies
 @admin_router_with_deps.get("/dashboard", response_model=DashboardData)
-async def admin_dashboard(current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.get_dashboard(admin_svc, current_user)
+async def admin_dashboard(current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Get admin dashboard data"""
+    try:
+        dashboard_data = await admin_svc.get_dashboard_data()
+        await admin_svc.log_system_event(
+            "INFO", 
+            f"Admin dashboard accessed by {current_user['email']}", 
+            "admin", 
+            current_user["id"]
+        )
+        return dashboard_data
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Dashboard error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to load dashboard")
 
 @admin_router_with_deps.get("/users", response_model=List[UserManagement])
-async def admin_get_users(skip: int = 0, limit: int = 50, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.get_users(skip, limit, admin_svc, current_user)
+async def admin_get_users(skip: int = 0, limit: int = 50, current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Get users for management"""
+    try:
+        users = await admin_svc.get_users_management(skip, limit)
+        return users
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Users management error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to load users")
 
 @admin_router_with_deps.put("/users/{user_id}/status")
-async def admin_update_user_status(user_id: str, is_active: bool, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.update_user_status(user_id, is_active, admin_svc, current_user)
+async def admin_update_user_status(user_id: str, is_active: bool, current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Update user active status"""
+    try:
+        success = await admin_svc.update_user_status(user_id, is_active)
+        if success:
+            action = "activated" if is_active else "deactivated"
+            await admin_svc.log_system_event(
+                "INFO", 
+                f"User {user_id} {action} by admin {current_user['email']}", 
+                "admin"
+            )
+            return {"success": True, "message": f"User {action} successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"User status update error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to update user status")
 
 @admin_router_with_deps.get("/projects", response_model=List[ProjectManagement])
-async def admin_get_projects(skip: int = 0, limit: int = 50, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.get_projects(skip, limit, admin_svc, current_user)
+async def admin_get_projects(skip: int = 0, limit: int = 50, current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Get projects for management"""
+    try:
+        projects = await admin_svc.get_projects_management(skip, limit)
+        return projects
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Projects management error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to load projects")
 
 @admin_router_with_deps.delete("/projects/{project_id}")
-async def admin_delete_project(project_id: str, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.delete_project(project_id, admin_svc, current_user)
+async def admin_delete_project(project_id: str, current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Delete a project"""
+    try:
+        success = await admin_svc.delete_project(project_id)
+        if success:
+            return {"success": True, "message": "Project deleted successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Project not found")
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Project deletion error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to delete project")
 
 @admin_router_with_deps.get("/logs", response_model=List[SystemLog])
-async def admin_get_logs(level: Optional[str] = None, limit: int = 100, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.get_logs(level, limit, admin_svc, current_user)
+async def admin_get_logs(level: Optional[str] = None, limit: int = 100, current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Get system logs"""
+    try:
+        logs = await admin_svc.get_system_logs(level, limit)
+        return logs
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Logs retrieval error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to load logs")
 
 @admin_router_with_deps.get("/settings", response_model=PlatformSettings)
-async def admin_get_settings(current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.get_settings(admin_svc, current_user)
+async def admin_get_settings(current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Get platform settings"""
+    try:
+        settings = await admin_svc.get_platform_settings()
+        return settings
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Settings retrieval error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to load settings")
 
 @admin_router_with_deps.put("/settings")
-async def admin_update_settings(settings: PlatformSettings, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.update_settings(settings, admin_svc, current_user)
+async def admin_update_settings(settings: PlatformSettings, current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Update platform settings"""
+    try:
+        success = await admin_svc.update_platform_settings(settings)
+        if success:
+            return {"success": True, "message": "Settings updated successfully"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to update settings")
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Settings update error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to update settings")
 
 @admin_router_with_deps.get("/analytics")
-async def admin_get_analytics(days: int = 30, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.get_analytics(days, admin_svc, current_user)
+async def admin_get_analytics(days: int = 30, current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Get usage analytics"""
+    try:
+        analytics = await admin_svc.get_usage_analytics(days)
+        return analytics
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Analytics error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to load analytics")
 
 @admin_router_with_deps.post("/users/{user_id}/make-admin")
-async def admin_make_admin(user_id: str, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
-    return await admin.make_admin(user_id, admin_svc, current_user)
+async def admin_make_admin(user_id: str, current_user = Depends(require_admin_access), admin_svc = Depends(get_admin_service)):
+    """Make a user admin"""
+    try:
+        admin_user = await admin_svc.create_admin_user(
+            user_id, 
+            "admin", 
+            current_user["id"]
+        )
+        await admin_svc.log_system_event(
+            "INFO", 
+            f"User {user_id} made admin by {current_user['email']}", 
+            "admin"
+        )
+        return {"success": True, "message": "User granted admin privileges"}
+    except Exception as e:
+        await admin_svc.log_system_event("ERROR", f"Make admin error: {str(e)}", "admin")
+        raise HTTPException(status_code=500, detail="Failed to grant admin privileges")
 
 api_router.include_router(admin_router_with_deps)
 
