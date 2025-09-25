@@ -72,15 +72,15 @@ class MultipleClaudeTester:
         
         return result
     
-    def run_multiple_tests(self, num_tests=5, concurrent=True):
+    def run_multiple_tests(self, num_tests=5, is_concurrent=True):
         """Run multiple tests"""
         print(f"🚀 Running {num_tests} Claude integration tests")
-        print(f"🔄 Concurrent: {concurrent}")
+        print(f"🔄 Concurrent: {is_concurrent}")
         print("=" * 50)
         
         start_time = time.time()
         
-        if concurrent:
+        if is_concurrent:
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
                 futures = [executor.submit(self.single_request_test, i+1) for i in range(num_tests)]
                 concurrent.futures.wait(futures)
