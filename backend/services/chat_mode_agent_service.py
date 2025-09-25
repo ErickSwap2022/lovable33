@@ -175,7 +175,7 @@ class ChatModeAgentService:
         return {
             "success": True,
             "type": "planning_assistance",
-            "response": response.text,
+            "response": response,
             "recommendations": [
                 "Start with MVP features",
                 "Plan for scalability",
