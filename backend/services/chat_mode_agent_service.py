@@ -374,7 +374,7 @@ class ChatModeAgentService:
         return {
             "success": True,
             "type": "explanation",
-            "response": response.text
+            "response": response
         }
     
     async def _handle_general_query(self, query: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
