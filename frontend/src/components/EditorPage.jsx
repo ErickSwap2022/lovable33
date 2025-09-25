@@ -4,6 +4,7 @@ import { Play, Code, Smartphone, Monitor, Share, Download, Settings } from "luci
 import ChatPanel from "./ChatPanel";
 import PreviewPanel from "./PreviewPanel";
 import CodePanel from "./CodePanel";
+import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -12,6 +13,7 @@ const API = `${BACKEND_URL}/api`;
 const EditorPage = () => {
   const location = useLocation();
   const initialPrompt = location.state?.prompt || "";
+  const { isAuthenticated } = useAuth();
   
   const [activeTab, setActiveTab] = useState("preview"); // preview, code
   const [viewMode, setViewMode] = useState("desktop"); // desktop, mobile
@@ -19,6 +21,7 @@ const EditorPage = () => {
   const [generatedCode, setGeneratedCode] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [sessionId] = useState(() => Date.now().toString());
+  const [showAuthWarning, setShowAuthWarning] = useState(false);
 
   useEffect(() => {
     if (initialPrompt) {
@@ -32,7 +35,7 @@ const EditorPage = () => {
     
     try {
       // Call backend to generate code
-      const response = await axios.post(`${API}/generate-code`, {
+      const response = await axios.post(`${API}/ai/generate-code`, {
         prompt: prompt,
         session_id: sessionId
       });
@@ -48,9 +51,16 @@ const EditorPage = () => {
       }
     } catch (error) {
       console.error("Error generating code:", error);
+      
+      // Show auth warning if user is not authenticated
+      if (!isAuthenticated && (error.response?.status === 401 || error.response?.status === 403)) {
+        setShowAuthWarning(true);
+      }
+      
       setChatMessages(prev => [...prev, { 
         type: "assistant", 
-        content: "I'm having trouble generating your code right now. Please try again in a moment." 
+        content: "I'm having trouble generating your code right now. " + 
+                 (!isAuthenticated ? "Try signing up for full access to all features!" : "Please try again in a moment.")
       }]);
       
       // Fallback to mock code
