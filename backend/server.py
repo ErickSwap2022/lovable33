@@ -32,6 +32,8 @@ from services.supabase_service import SupabaseService
 from services.github_service import GitHubService
 from services.visual_editor_service import VisualEditorService
 from services.media_service import MediaService
+from services.chat_mode_agent_service import ChatModeAgentService
+from services.realtime_visual_service import RealtimeVisualService
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
