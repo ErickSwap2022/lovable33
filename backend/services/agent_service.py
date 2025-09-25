@@ -466,8 +466,11 @@ class AgentService:
         
         response = await chat.send_message(UserMessage(text=log_analysis_prompt))
         
+        # Handle response - it might be a string or an object
+        response_text = response if isinstance(response, str) else getattr(response, 'text', str(response))
+        
         return {
-            "analysis": response.text,
+            "analysis": response_text,
             "errors_found": len([log for log in logs if "error" in log.lower()]),
             "warnings_found": len([log for log in logs if "warning" in log.lower()]),
             "recommendations": "Check the analysis for detailed recommendations"
