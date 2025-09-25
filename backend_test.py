@@ -883,6 +883,304 @@ class LovableCloneAPITester:
             return False
 
     # =============================================================================
+    # NEW ADVANCED ENDPOINTS TESTS (Agent Mode, Visual Editor, GitHub, Supabase, Media)
+    # =============================================================================
+    
+    def test_agent_generate_code(self):
+        """Test autonomous AI agent code generation endpoint"""
+        data = {
+            "prompt": "Create a React todo app with add, delete, and toggle functionality",
+            "session_id": self.test_session_id,
+            "context": {
+                "framework": "react",
+                "style": "modern"
+            }
+        }
+        
+        response = self.make_request("POST", "/ai/agent-generate", data)
+        
+        if response is None:
+            self.log_result("Agent Generate Code", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result and result["success"] and "code" in result:
+                    self.log_result("Agent Generate Code", True, f"Agent generated code with confidence: {result.get('confidence_score', 'N/A')}")
+                    return True
+                else:
+                    self.log_result("Agent Generate Code", False, "Missing success or code in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Agent Generate Code", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Agent Generate Code", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_codebase_search(self):
+        """Test intelligent codebase search endpoint"""
+        params = {
+            "query": "authentication function",
+            "project_id": self.test_project_id or "test-project-id"
+        }
+        
+        response = self.make_request("POST", "/ai/codebase-search", params=params)
+        
+        if response is None:
+            self.log_result("Codebase Search", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result and "results" in result:
+                    self.log_result("Codebase Search", True, f"Found {len(result['results'])} search results")
+                    return True
+                else:
+                    self.log_result("Codebase Search", False, "Missing success or results in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Codebase Search", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Codebase Search", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_visual_editor_apply(self):
+        """Test visual editor apply changes endpoint"""
+        data = {
+            "current_code": "function Button() { return <button>Click me</button>; }",
+            "operations": [
+                {
+                    "type": "style_change",
+                    "target": "button",
+                    "property": "backgroundColor",
+                    "value": "#007bff"
+                }
+            ]
+        }
+        
+        response = self.make_request("POST", "/visual-editor/apply", data)
+        
+        if response is None:
+            self.log_result("Visual Editor Apply", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result:
+                    self.log_result("Visual Editor Apply", True, "Visual changes applied successfully")
+                    return True
+                else:
+                    self.log_result("Visual Editor Apply", False, "Missing success in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Visual Editor Apply", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Visual Editor Apply", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_visual_editor_metadata(self):
+        """Test visual editor metadata endpoint"""
+        params = {
+            "code": "function Button({ onClick, children }) { return <button onClick={onClick}>{children}</button>; }"
+        }
+        
+        response = self.make_request("GET", "/visual-editor/metadata", params=params)
+        
+        if response is None:
+            self.log_result("Visual Editor Metadata", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result:
+                    self.log_result("Visual Editor Metadata", True, "Component metadata generated successfully")
+                    return True
+                else:
+                    self.log_result("Visual Editor Metadata", False, "Missing success in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Visual Editor Metadata", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Visual Editor Metadata", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_github_create_repo(self):
+        """Test GitHub repository creation endpoint"""
+        data = {
+            "project_name": f"test-repo-{int(time.time())}",
+            "description": "Test repository created by automated testing",
+            "private": True,
+            "user_token": "mock-github-token"
+        }
+        
+        response = self.make_request("POST", "/github/create-repo", data)
+        
+        if response is None:
+            self.log_result("GitHub Create Repo", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result:
+                    self.log_result("GitHub Create Repo", True, "Repository creation initiated")
+                    return True
+                else:
+                    self.log_result("GitHub Create Repo", False, "Missing success in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("GitHub Create Repo", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("GitHub Create Repo", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_github_auto_commit(self):
+        """Test GitHub auto-commit endpoint"""
+        params = {
+            "repo_name": "test-repo",
+            "files": {
+                "index.js": "console.log('Hello World');",
+                "package.json": '{"name": "test-app", "version": "1.0.0"}'
+            },
+            "message": "Automated commit from testing",
+            "user_token": "mock-github-token"
+        }
+        
+        response = self.make_request("POST", "/github/auto-commit", params=params)
+        
+        if response is None:
+            self.log_result("GitHub Auto Commit", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result:
+                    self.log_result("GitHub Auto Commit", True, "Auto-commit completed")
+                    return True
+                else:
+                    self.log_result("GitHub Auto Commit", False, "Missing success in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("GitHub Auto Commit", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("GitHub Auto Commit", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_supabase_setup_database(self):
+        """Test Supabase database setup endpoint"""
+        data = {
+            "project_id": self.test_project_id or "test-project-id",
+            "schema": {
+                "users": {
+                    "id": "uuid",
+                    "email": "text",
+                    "created_at": "timestamp"
+                },
+                "posts": {
+                    "id": "uuid",
+                    "title": "text",
+                    "content": "text",
+                    "user_id": "uuid"
+                }
+            }
+        }
+        
+        response = self.make_request("POST", "/supabase/setup-database", data)
+        
+        if response is None:
+            self.log_result("Supabase Setup Database", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result:
+                    self.log_result("Supabase Setup Database", True, "Database setup completed")
+                    return True
+                else:
+                    self.log_result("Supabase Setup Database", False, "Missing success in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Supabase Setup Database", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Supabase Setup Database", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_supabase_chat_to_db(self):
+        """Test Supabase natural language to SQL endpoint"""
+        params = {
+            "project_id": self.test_project_id or "test-project-id",
+            "query": "Show me all users who created posts in the last week"
+        }
+        
+        response = self.make_request("POST", "/supabase/chat-to-db", params=params)
+        
+        if response is None:
+            self.log_result("Supabase Chat to DB", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result:
+                    self.log_result("Supabase Chat to DB", True, "Natural language query processed")
+                    return True
+                else:
+                    self.log_result("Supabase Chat to DB", False, "Missing success in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Supabase Chat to DB", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Supabase Chat to DB", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_media_upload_image(self):
+        """Test media image upload endpoint"""
+        # Create mock image data
+        mock_image_data = b"fake-image-data-for-testing"
+        
+        params = {
+            "file_data": mock_image_data,
+            "filename": "test-image.jpg",
+            "project_id": self.test_project_id or "test-project-id"
+        }
+        
+        response = self.make_request("POST", "/media/upload-image", params=params)
+        
+        if response is None:
+            self.log_result("Media Upload Image", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result:
+                    self.log_result("Media Upload Image", True, "Image upload processed")
+                    return True
+                else:
+                    self.log_result("Media Upload Image", False, "Missing success in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Media Upload Image", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Media Upload Image", False, f"Status: {response.status_code}", response.text)
+            return False
+
+    # =============================================================================
     # MAIN TEST RUNNER
     # =============================================================================
     
