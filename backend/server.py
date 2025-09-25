@@ -390,7 +390,10 @@ async def add_chat_message(session_id: str, message: ChatMessage):
             "timestamp": datetime.utcnow()
         }
         
-        await db.chat_messages.insert_one(message_data)
+        result = await db.chat_messages.insert_one(message_data)
+        
+        # Remove ObjectId for response
+        message_data.pop("_id", None)
         
         return {
             "success": True,
