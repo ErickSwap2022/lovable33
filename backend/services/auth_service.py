@@ -89,9 +89,9 @@ class AuthService:
         if not self.verify_password(password, user.get("hashed_password", "")):
             return False
         
-        # Convert ObjectId to string and remove _id field
-        if "_id" in user:
-            user["id"] = str(user["_id"])
-            user.pop("_id", None)
+        # Remove sensitive data and MongoDB ObjectId
+        user_response = user.copy()
+        user_response.pop("hashed_password", None)
+        user_response.pop("_id", None)
         
-        return user
+        return user_response
