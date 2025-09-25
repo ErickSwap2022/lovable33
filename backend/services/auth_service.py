@@ -81,4 +81,10 @@ class AuthService:
             return False
         if not self.verify_password(password, user.get("hashed_password", "")):
             return False
+        
+        # Convert ObjectId to string and remove _id field
+        if "_id" in user:
+            user["id"] = str(user["_id"])
+            user.pop("_id", None)
+        
         return user
