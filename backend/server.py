@@ -55,6 +55,8 @@ supabase_service = SupabaseService()
 github_service = GitHubService()
 visual_editor_service = VisualEditorService()
 media_service = MediaService()
+chat_agent_service = ChatModeAgentService()
+realtime_visual_service = RealtimeVisualService()
 
 # Security
 security = HTTPBearer(auto_error=False)
