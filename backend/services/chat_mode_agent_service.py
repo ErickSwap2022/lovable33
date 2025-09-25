@@ -278,7 +278,7 @@ class ChatModeAgentService:
         return {
             "success": True,
             "type": "log_analysis",
-            "response": response.text,
+            "response": response,
             "metrics": {
                 "total_logs": len(logs),
                 "errors": error_count,
