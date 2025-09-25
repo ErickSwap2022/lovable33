@@ -329,7 +329,7 @@ class ChatModeAgentService:
         return {
             "success": True,
             "type": "database_consultation",
-            "response": response.text
+            "response": response
         }
     
     async def _handle_explanation_query(self, query: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
