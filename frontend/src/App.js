@@ -22,13 +22,10 @@ function App() {
             <Route path="/signup" element={<AuthPage mode="signup" />} />
             <Route path="/templates" element={<TemplatesPage />} />
             
+            {/* Editor - Accessible without auth for demo */}
+            <Route path="/editor" element={<EditorPage />} />
+            
             {/* Protected Routes */}
-            <Route path="/editor" element={
-              <ProtectedRoute>
-                <EditorPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/projects" element={
               <ProtectedRoute>
                 <ProjectsPage />
               </ProtectedRoute>
