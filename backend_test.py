@@ -1324,7 +1324,8 @@ class LovableCloneAPITester:
                 self.log_result("Admin Make User Admin", False, f"Status: {response.status_code if response else 'No response'}")
             
             # Test update user status endpoint
-            response = self.make_request("PUT", f"/admin/users/{self.test_user_id}/status", {"is_active": True})
+            data = {"is_active": True}
+            response = self.make_request("PUT", f"/admin/users/{self.test_user_id}/status", data)
             if response and response.status_code == 200:
                 self.log_result("Admin Update User Status", True, "Update user status endpoint working")
             else:
