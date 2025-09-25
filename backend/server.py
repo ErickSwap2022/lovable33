@@ -610,6 +610,87 @@ async def upload_image(file_data: bytes, filename: str, project_id: Optional[str
             "message": "Failed to upload image"
         }
 
+# =============================================================================
+# CHAT MODE AGENT ROUTES (Helper Agent - No Code Editing)
+# =============================================================================
+
+@api_router.post("/chat-agent/query")
+async def chat_agent_query(query: str, context: Dict[str, Any] = None, session_id: str = "default"):
+    """Process query with Chat Mode Agent (helper, doesn't edit code)"""
+    try:
+        result = await chat_agent_service.process_query(
+            query, 
+            context or {}, 
+            session_id
+        )
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to process chat agent query"
+        }
+
+@api_router.post("/chat-agent/multi-step-reasoning")
+async def chat_agent_reasoning(problem: str, context: Dict[str, Any] = None, session_id: str = "default"):
+    """Multi-step reasoning for complex problems"""
+    try:
+        result = await chat_agent_service.multi_step_reasoning(
+            problem,
+            context or {},
+            session_id
+        )
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to process reasoning request"
+        }
+
+# =============================================================================
+# REAL-TIME VISUAL EDITOR ROUTES (HMR-like)
+# =============================================================================
+
+@api_router.post("/realtime-visual/start-session")
+async def start_visual_session(session_id: str, initial_code: str):
+    """Start real-time visual editing session"""
+    try:
+        result = await realtime_visual_service.start_visual_session(session_id, initial_code)
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to start visual session"
+        }
+
+@api_router.post("/realtime-visual/apply-change")
+async def apply_realtime_change(session_id: str, change: Dict[str, Any]):
+    """Apply real-time visual change with immediate feedback"""
+    try:
+        result = await realtime_visual_service.apply_realtime_change(session_id, change)
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to apply real-time change"
+        }
+
+@api_router.get("/realtime-visual/session/{session_id}")
+async def get_visual_session_info(session_id: str):
+    """Get real-time visual session information"""
+    try:
+        result = await realtime_visual_service.get_session_info(session_id)
+        return result
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to get session info"
+        }
+
 # Include all routers
 api_router.include_router(auth_router)
 api_router.include_router(projects_router)  
