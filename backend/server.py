@@ -423,9 +423,6 @@ api_router.include_router(templates_router)
 api_router.include_router(ai_router)
 api_router.include_router(deploy_router)
 
-# Admin routes
-from routers import admin
-
 # Create admin router with dependencies
 admin_router_with_deps = APIRouter(prefix="/admin", tags=["Admin"])
 
