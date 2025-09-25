@@ -205,7 +205,7 @@ Return a JSON array of improvement suggestions."""
                 api_key=self.api_key,
                 session_id=f"improvements_{session_id}",
                 system_message=system_message
-            ).with_model("openai", "gpt-4o-mini")
+            ).with_model("anthropic", "claude-3-5-sonnet-20241022")
 
             user_message = UserMessage(text=f"Analyze this React code and suggest improvements:\n\n{code}")
             response = await chat.send_message(user_message)
