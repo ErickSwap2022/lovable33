@@ -24,6 +24,7 @@ const EditorPage = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [sessionId] = useState(() => Date.now().toString());
   const [showAuthWarning, setShowAuthWarning] = useState(false);
+  const [agentMode, setAgentMode] = useState(false);
 
   useEffect(() => {
     if (initialPrompt) {
