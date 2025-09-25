@@ -55,6 +55,7 @@ const HomePage = () => {
                 
                 {/* Submit Button */}
                 <button
+                  type="button"
                   onClick={handleStartBuilding}
                   disabled={!prompt.trim()}
                   className="absolute bottom-3 right-3 p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full transition-all duration-200 hover:scale-105"
