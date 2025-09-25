@@ -103,7 +103,7 @@ async def get_projects(
 @router.delete("/projects/{project_id}")
 async def delete_project(
     project_id: str,
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Delete a project"""
@@ -121,7 +121,7 @@ async def delete_project(
 async def get_logs(
     level: Optional[str] = Query(None),
     limit: int = Query(100, ge=1, le=500),
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Get system logs"""
@@ -134,7 +134,7 @@ async def get_logs(
 
 @router.get("/settings", response_model=PlatformSettings)
 async def get_settings(
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Get platform settings"""
@@ -148,7 +148,7 @@ async def get_settings(
 @router.put("/settings")
 async def update_settings(
     settings: PlatformSettings,
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Update platform settings"""
@@ -165,7 +165,7 @@ async def update_settings(
 @router.get("/analytics")
 async def get_analytics(
     days: int = Query(30, ge=1, le=365),
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Get usage analytics"""
@@ -179,7 +179,7 @@ async def get_analytics(
 @router.post("/users/{user_id}/make-admin")
 async def make_admin(
     user_id: str,
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Make a user admin"""
