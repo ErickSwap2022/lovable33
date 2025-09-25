@@ -30,34 +30,27 @@ const EditorPage = () => {
   }, [initialPrompt]);
 
   const handleGenerate = async (prompt) => {
-    console.log("Starting code generation for prompt:", prompt);
     setIsGenerating(true);
     setChatMessages(prev => [...prev, { type: "user", content: prompt }]);
     
     try {
-      console.log("Making API call to:", `${API}/ai/generate-code`);
       // Call backend to generate code
       const response = await axios.post(`${API}/ai/generate-code`, {
         prompt: prompt,
         session_id: sessionId
       });
       
-      console.log("API Response received:", response.data);
-      
       if (response.data.success) {
-        console.log("Success! Setting generated code. Code length:", response.data.code?.length || 0);
         setGeneratedCode(response.data.code);
         setChatMessages(prev => [...prev, { 
           type: "assistant", 
           content: response.data.message || "I've created your application! You can see the preview on the right and edit the code in the Code tab." 
         }]);
       } else {
-        console.error("API returned success: false", response.data);
         throw new Error("Failed to generate code");
       }
     } catch (error) {
       console.error("Error generating code:", error);
-      console.error("Error response:", error.response?.data);
       
       // Show auth warning if user is not authenticated
       if (!isAuthenticated && (error.response?.status === 401 || error.response?.status === 403)) {
@@ -72,10 +65,8 @@ const EditorPage = () => {
       
       // Fallback to mock code
       const mockCode = generateMockCode(prompt);
-      console.log("Using fallback mock code. Length:", mockCode.length);
       setGeneratedCode(mockCode);
     } finally {
-      console.log("Setting isGenerating to false");
       setIsGenerating(false);
     }
   };
