@@ -89,7 +89,7 @@ async def update_user_status(
 async def get_projects(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
-    admin_service: AdminService = Depends(),
+    admin_service: Any = Depends(),
     current_user: User = Depends(require_admin)
 ):
     """Get projects for management"""
