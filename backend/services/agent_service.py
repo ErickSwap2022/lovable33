@@ -171,8 +171,11 @@ class AgentService:
         
         response = await chat.send_message(UserMessage(text=generation_prompt))
         
+        # Handle response - it might be a string or an object
+        response_text = response if isinstance(response, str) else getattr(response, 'text', str(response))
+        
         # Extract code from response
-        code = self._extract_code_from_response(response.text)
+        code = self._extract_code_from_response(response_text)
         
         return {
             "code": code,
