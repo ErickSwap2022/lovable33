@@ -123,7 +123,7 @@ class ChatModeAgentService:
         return {
             "success": True,
             "type": "debugging_assistance",
-            "response": response.text,
+            "response": response,
             "suggestions": [
                 "Check browser console for errors",
                 "Verify component props and state",
