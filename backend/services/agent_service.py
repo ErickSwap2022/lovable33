@@ -341,8 +341,11 @@ class AgentService:
         
         response = await chat.send_message(UserMessage(text=optimization_prompt))
         
+        # Handle response - it might be a string or an object
+        response_text = response if isinstance(response, str) else getattr(response, 'text', str(response))
+        
         # Extract optimized code and optimizations
-        optimized_code = self._extract_code_from_response(response.text)
+        optimized_code = self._extract_code_from_response(response_text)
         
         # Calculate confidence score based on analysis
         confidence_score = self._calculate_confidence_score(validation_result, len(optimized_code))
