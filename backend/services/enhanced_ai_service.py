@@ -86,7 +86,8 @@ class EnhancedAIService:
         chat = LlmChat(
             api_key=self.api_key,
             session_id=f"analysis_{session_id}",
-            system_message=system_message
+            system_message=system_message,
+            timeout=120  # 2 minutes timeout for complex analysis
         ).with_model("anthropic", "claude-3-5-sonnet-20241022")
         
         analysis_prompt = f"""
