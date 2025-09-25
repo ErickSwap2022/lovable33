@@ -115,6 +115,28 @@ export default App;`;
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
+      {/* Auth Warning Banner */}
+      {showAuthWarning && (
+        <div className="bg-yellow-50 border-b border-yellow-200 px-6 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="text-yellow-800">
+                <p className="text-sm">
+                  <strong>Demo Mode:</strong> You're using limited features. 
+                  <a href="/signup" className="ml-1 underline hover:no-underline">Sign up for free</a> to unlock full AI capabilities!
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowAuthWarning(false)}
+              className="text-yellow-600 hover:text-yellow-800"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-3">
         <div className="flex items-center justify-between">
