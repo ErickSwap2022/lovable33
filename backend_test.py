@@ -1283,6 +1283,26 @@ class LovableCloneAPITester:
         self.test_add_chat_message()
         self.test_get_chat_history()
         
+        # Advanced Endpoints Tests
+        print("\n🤖 Testing Advanced AI Agent Mode...")
+        self.test_agent_generate_code()
+        self.test_codebase_search()
+        
+        print("\n🎨 Testing Visual Editor...")
+        self.test_visual_editor_apply()
+        self.test_visual_editor_metadata()
+        
+        print("\n🐙 Testing GitHub Integration...")
+        self.test_github_create_repo()
+        self.test_github_auto_commit()
+        
+        print("\n🗄️ Testing Supabase Integration...")
+        self.test_supabase_setup_database()
+        self.test_supabase_chat_to_db()
+        
+        print("\n📷 Testing Media Upload...")
+        self.test_media_upload_image()
+        
         # Cleanup - Delete test project
         if self.test_project_id and self.auth_token:
             print("\n🧹 Cleaning up test data...")
