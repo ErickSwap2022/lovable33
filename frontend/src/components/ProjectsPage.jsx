@@ -187,7 +187,7 @@ const ProjectsPage = () => {
                 project={project}
                 onOpen={openProject}
                 onFork={forkProject}
-                isOwner={user?.id === project.owner_id}
+                isOwner={isAuthenticated && user && user.id === project.owner_id}
               />
             ))}
           </div>
