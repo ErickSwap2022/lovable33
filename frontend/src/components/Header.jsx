@@ -13,7 +13,8 @@ const Header = () => {
     if (isAuthenticated) {
       navigate("/editor");
     } else {
-      navigate("/signup");
+      // Permite acesso ao editor como demo sem autenticação
+      navigate("/editor", { state: { prompt: "Welcome to Lovable! Create your first app..." } });
     }
   };
 
