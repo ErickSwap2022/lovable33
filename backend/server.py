@@ -423,9 +423,61 @@ api_router.include_router(templates_router)
 api_router.include_router(ai_router)
 api_router.include_router(deploy_router)
 
-# Import and include admin router
-from routers.admin import router as admin_api_router
-api_router.include_router(admin_api_router)
+# Admin routes
+from routers import admin
+
+# Create admin router with dependencies
+admin_router_with_deps = APIRouter(prefix="/admin", tags=["Admin"])
+
+# Override dependencies for admin routes
+def get_admin_service():
+    return admin_service
+
+def get_current_user_for_admin(credentials = Depends(security)):
+    return get_current_user(credentials)
+
+# Add admin routes with proper dependencies
+@admin_router_with_deps.get("/dashboard", response_model=DashboardData)
+async def admin_dashboard(current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.get_dashboard(admin_svc, current_user)
+
+@admin_router_with_deps.get("/users", response_model=List[UserManagement])
+async def admin_get_users(skip: int = 0, limit: int = 50, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.get_users(skip, limit, admin_svc, current_user)
+
+@admin_router_with_deps.put("/users/{user_id}/status")
+async def admin_update_user_status(user_id: str, is_active: bool, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.update_user_status(user_id, is_active, admin_svc, current_user)
+
+@admin_router_with_deps.get("/projects", response_model=List[ProjectManagement])
+async def admin_get_projects(skip: int = 0, limit: int = 50, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.get_projects(skip, limit, admin_svc, current_user)
+
+@admin_router_with_deps.delete("/projects/{project_id}")
+async def admin_delete_project(project_id: str, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.delete_project(project_id, admin_svc, current_user)
+
+@admin_router_with_deps.get("/logs", response_model=List[SystemLog])
+async def admin_get_logs(level: Optional[str] = None, limit: int = 100, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.get_logs(level, limit, admin_svc, current_user)
+
+@admin_router_with_deps.get("/settings", response_model=PlatformSettings)
+async def admin_get_settings(current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.get_settings(admin_svc, current_user)
+
+@admin_router_with_deps.put("/settings")
+async def admin_update_settings(settings: PlatformSettings, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.update_settings(settings, admin_svc, current_user)
+
+@admin_router_with_deps.get("/analytics")
+async def admin_get_analytics(days: int = 30, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.get_analytics(days, admin_svc, current_user)
+
+@admin_router_with_deps.post("/users/{user_id}/make-admin")
+async def admin_make_admin(user_id: str, current_user = Depends(get_current_user), admin_svc = Depends(get_admin_service)):
+    return await admin.make_admin(user_id, admin_svc, current_user)
+
+api_router.include_router(admin_router_with_deps)
 
 app.include_router(api_router)
 
