@@ -17,6 +17,7 @@ from models.user import User, UserCreate, UserLogin, UserResponse, Token, UserUp
 from models.template import Template, TemplateCreate, TemplateResponse
 from models.project_extended import Project, ProjectCreate, ProjectUpdate, ProjectResponse, DeploymentRequest
 from models.project import ChatMessage, GenerateCodeRequest
+from models.admin import DashboardData, UserManagement, ProjectManagement, SystemLog, PlatformSettings
 
 # Import services
 from services.auth_service import AuthService
