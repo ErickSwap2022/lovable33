@@ -1045,7 +1045,7 @@ class LovableCloneAPITester:
     
     def test_github_auto_commit(self):
         """Test GitHub auto-commit endpoint"""
-        params = {
+        data = {
             "repo_name": "test-repo",
             "files": {
                 "index.js": "console.log('Hello World');",
@@ -1055,7 +1055,7 @@ class LovableCloneAPITester:
             "user_token": "mock-github-token"
         }
         
-        response = self.make_request("POST", "/github/auto-commit", params=params)
+        response = self.make_request("POST", "/github/auto-commit", data)
         
         if response is None:
             self.log_result("GitHub Auto Commit", False, "Request failed")
