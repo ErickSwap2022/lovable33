@@ -47,6 +47,11 @@ template_service = TemplateService(db)
 deployment_service = DeploymentService(db)
 ai_service = EnhancedAIService()
 admin_service = AdminService(db)
+agent_service = AgentService()
+supabase_service = SupabaseService()
+github_service = GitHubService()
+visual_editor_service = VisualEditorService()
+media_service = MediaService()
 
 # Security
 security = HTTPBearer(auto_error=False)
