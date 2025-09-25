@@ -15,77 +15,37 @@ class EnhancedAIService:
         if not self.api_key:
             raise ValueError("EMERGENT_LLM_KEY not found in environment variables")
     
-    async def generate_code(self, prompt: str, session_id: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Generate React code with enhanced features"""
+    async def generate_code(self, prompt: str, session_id: str, context: Optional[Dict] = None) -> Dict[str, Any]:
+        """
+        Generate COMPLETE, production-ready applications with extreme quality
+        """
         try:
-            # Enhanced system message for better code generation
-            system_message = """You are an expert React developer and UI/UX designer. Generate production-ready, modern web applications.
-
-TECHNICAL REQUIREMENTS:
-- Use React 18+ with functional components and hooks
-- Use JavaScript (NOT TypeScript) - no type annotations
-- Use Tailwind CSS for styling with modern design principles
-- Implement responsive design (mobile-first)
-- Include proper accessibility (ARIA labels, semantic HTML)
-- Add smooth animations and transitions
-- Use modern ES6+ syntax
-
-DESIGN PRINCIPLES:
-- Clean, minimalist interfaces
-- Consistent spacing and typography
-- Professional color schemes
-- Intuitive user experience
-- Modern UI patterns (cards, gradients, shadows)
-
-STRUCTURE:
-- Always return complete, production-ready components
-- Include proper imports
-- Use meaningful component and variable names
-- Add helpful comments for complex logic
-- Ensure code is properly formatted
-- NO TypeScript syntax - use plain JavaScript only
-
-RESPONSE FORMAT:
-Return ONLY valid React JavaScript code without markdown formatting or TypeScript type annotations."""
-
-            chat = LlmChat(
-                api_key=self.api_key,
-                session_id=f"enhanced_code_{session_id}",
-                system_message=system_message
-            ).with_model("anthropic", "claude-3-5-sonnet-20241022")
-
-            # Enhanced prompt with context
-            enhanced_prompt = self._build_enhanced_prompt(prompt, context)
-
-            user_message = UserMessage(text=enhanced_prompt)
-            response = await chat.send_message(user_message)
+            # Phase 1: Comprehensive Analysis & Planning
+            analysis = await self._analyze_requirements(prompt, context, session_id)
             
-            # Clean and validate the response
-            code = self._clean_code_response(response)
+            # Phase 2: Architecture Design
+            architecture = await self._design_architecture(prompt, analysis)
             
-            # Generate additional metadata
-            metadata = await self.generate_metadata(prompt, code, session_id)
+            # Phase 3: Complete Code Generation
+            code_result = await self._generate_complete_application(prompt, architecture, analysis, session_id)
+            
+            # Phase 4: Quality Assurance & Optimization
+            final_result = await self._optimize_and_validate(code_result, session_id)
             
             return {
-                "code": code,
-                "metadata": metadata,
-                "prompt": prompt,
-                "success": True
+                "success": True,
+                "code": final_result["code"],
+                "architecture": architecture,
+                "analysis": analysis,
+                "quality_metrics": final_result["quality_metrics"],
+                "message": "Complete production-ready application generated with extreme quality"
             }
             
         except Exception as e:
-            print(f"Error generating enhanced code: {e}")
             return {
-                "code": self._get_fallback_component(prompt),
-                "metadata": {
-                    "title": "Fallback Component",
-                    "description": "A basic component generated due to an error",
-                    "tech_stack": ["React", "Tailwind CSS"],
-                    "features": ["Basic UI"]
-                },
-                "prompt": prompt,
                 "success": False,
-                "error": str(e)
+                "error": str(e),
+                "message": "Failed to generate high-quality code"
             }
     
     def _build_enhanced_prompt(self, prompt: str, context: Dict[str, Any] = None) -> str:
