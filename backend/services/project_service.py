@@ -132,7 +132,7 @@ class ProjectService:
     
     async def fork_project(self, project_id: str, user_id: str, fork_name: str = None) -> Project:
         """Fork a project"""
-        original_project = await self.get_project_by_id(project_id)
+        original_project = await self.get_project_by_id(project_id, user_id)
         
         if not original_project.is_public and original_project.owner_id != user_id:
             raise HTTPException(status_code=403, detail="Cannot fork private project")
