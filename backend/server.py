@@ -417,10 +417,14 @@ async def root():
 
 # Include all routers
 api_router.include_router(auth_router)
-api_router.include_router(projects_router)
+api_router.include_router(projects_router)  
 api_router.include_router(templates_router)
 api_router.include_router(ai_router)
 api_router.include_router(deploy_router)
+
+# Import and include admin router
+from routers.admin import router as admin_api_router
+api_router.include_router(admin_api_router)
 
 app.include_router(api_router)
 
