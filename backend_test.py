@@ -1,0 +1,754 @@
+#!/usr/bin/env python3
+"""
+Comprehensive Backend API Test Suite for Lovable Clone
+Tests all endpoints including authentication, AI, templates, projects, and deployment
+"""
+
+import requests
+import json
+import uuid
+import time
+from datetime import datetime
+import sys
+import os
+
+# Get backend URL from frontend .env
+BACKEND_URL = "https://prompt-coder-1.preview.emergentagent.com/api"
+
+class LovableCloneAPITester:
+    def __init__(self):
+        self.base_url = BACKEND_URL
+        self.session = requests.Session()
+        self.auth_token = None
+        self.test_user_id = None
+        self.test_project_id = None
+        self.test_template_id = None
+        self.test_session_id = str(uuid.uuid4())
+        
+        # Test data
+        self.test_user_email = f"testuser_{int(time.time())}@example.com"
+        self.test_user_password = "SecurePassword123!"
+        self.test_user_name = "Test User"
+        
+        self.results = {
+            "total_tests": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": []
+        }
+    
+    def log_result(self, test_name, success, message="", response_data=None):
+        """Log test result"""
+        self.results["total_tests"] += 1
+        if success:
+            self.results["passed"] += 1
+            print(f"✅ {test_name}: PASSED {message}")
+        else:
+            self.results["failed"] += 1
+            error_info = {
+                "test": test_name,
+                "message": message,
+                "response": response_data
+            }
+            self.results["errors"].append(error_info)
+            print(f"❌ {test_name}: FAILED - {message}")
+    
+    def make_request(self, method, endpoint, data=None, headers=None, params=None):
+        """Make HTTP request with error handling"""
+        url = f"{self.base_url}{endpoint}"
+        
+        # Add auth header if token exists
+        if self.auth_token and headers is None:
+            headers = {"Authorization": f"Bearer {self.auth_token}"}
+        elif self.auth_token and headers:
+            headers["Authorization"] = f"Bearer {self.auth_token}"
+        
+        try:
+            if method.upper() == "GET":
+                response = self.session.get(url, headers=headers, params=params, timeout=30)
+            elif method.upper() == "POST":
+                response = self.session.post(url, json=data, headers=headers, params=params, timeout=30)
+            elif method.upper() == "PUT":
+                response = self.session.put(url, json=data, headers=headers, params=params, timeout=30)
+            elif method.upper() == "DELETE":
+                response = self.session.delete(url, headers=headers, params=params, timeout=30)
+            else:
+                raise ValueError(f"Unsupported method: {method}")
+            
+            return response
+        except requests.exceptions.RequestException as e:
+            print(f"Request error for {method} {url}: {e}")
+            return None
+    
+    # =============================================================================
+    # AUTHENTICATION TESTS
+    # =============================================================================
+    
+    def test_user_registration(self):
+        """Test user registration endpoint"""
+        data = {
+            "email": self.test_user_email,
+            "password": self.test_user_password,
+            "name": self.test_user_name,
+            "username": f"testuser_{int(time.time())}"
+        }
+        
+        response = self.make_request("POST", "/auth/register", data)
+        
+        if response is None:
+            self.log_result("User Registration", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "access_token" in result and "user" in result:
+                    self.auth_token = result["access_token"]
+                    self.test_user_id = result["user"]["id"]
+                    self.log_result("User Registration", True, f"User created with ID: {self.test_user_id}")
+                    return True
+                else:
+                    self.log_result("User Registration", False, "Missing access_token or user in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("User Registration", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("User Registration", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_user_login(self):
+        """Test user login endpoint"""
+        data = {
+            "email": self.test_user_email,
+            "password": self.test_user_password
+        }
+        
+        response = self.make_request("POST", "/auth/login", data)
+        
+        if response is None:
+            self.log_result("User Login", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "access_token" in result and "user" in result:
+                    self.auth_token = result["access_token"]
+                    self.log_result("User Login", True, "Login successful")
+                    return True
+                else:
+                    self.log_result("User Login", False, "Missing access_token or user in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("User Login", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("User Login", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_get_current_user(self):
+        """Test get current user info endpoint"""
+        if not self.auth_token:
+            self.log_result("Get Current User", False, "No auth token available")
+            return False
+        
+        response = self.make_request("GET", "/auth/me")
+        
+        if response is None:
+            self.log_result("Get Current User", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "id" in result and "email" in result:
+                    self.log_result("Get Current User", True, f"User info retrieved for: {result['email']}")
+                    return True
+                else:
+                    self.log_result("Get Current User", False, "Missing user info in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Get Current User", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Get Current User", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_protected_route_without_auth(self):
+        """Test protected route without authentication"""
+        # Temporarily remove auth token
+        temp_token = self.auth_token
+        self.auth_token = None
+        
+        response = self.make_request("GET", "/auth/me")
+        
+        # Restore auth token
+        self.auth_token = temp_token
+        
+        if response is None:
+            self.log_result("Protected Route Without Auth", False, "Request failed")
+            return False
+        
+        if response.status_code == 401:
+            self.log_result("Protected Route Without Auth", True, "Correctly rejected unauthorized request")
+            return True
+        else:
+            self.log_result("Protected Route Without Auth", False, f"Expected 401, got {response.status_code}", response.text)
+            return False
+    
+    # =============================================================================
+    # AI SERVICE TESTS
+    # =============================================================================
+    
+    def test_ai_generate_code(self):
+        """Test AI code generation endpoint"""
+        data = {
+            "prompt": "Create a simple React button component",
+            "session_id": self.test_session_id
+        }
+        
+        response = self.make_request("POST", "/ai/generate-code", data)
+        
+        if response is None:
+            self.log_result("AI Generate Code", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result and result["success"] and "code" in result:
+                    self.log_result("AI Generate Code", True, "Code generated successfully")
+                    return True
+                else:
+                    self.log_result("AI Generate Code", False, "Missing success or code in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("AI Generate Code", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("AI Generate Code", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_ai_improve_code(self):
+        """Test AI code improvement endpoint"""
+        data = {
+            "code": "function hello() { console.log('hello'); }",
+            "session_id": self.test_session_id
+        }
+        
+        response = self.make_request("POST", "/ai/improve-code", data)
+        
+        if response is None:
+            self.log_result("AI Improve Code", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result and result["success"] and "suggestions" in result:
+                    self.log_result("AI Improve Code", True, "Code improvements generated")
+                    return True
+                else:
+                    self.log_result("AI Improve Code", False, "Missing success or suggestions in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("AI Improve Code", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("AI Improve Code", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_ai_generate_tests(self):
+        """Test AI test generation endpoint"""
+        data = {
+            "code": "function add(a, b) { return a + b; }",
+            "session_id": self.test_session_id
+        }
+        
+        response = self.make_request("POST", "/ai/generate-tests", data)
+        
+        if response is None:
+            self.log_result("AI Generate Tests", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result and result["success"] and "tests" in result:
+                    self.log_result("AI Generate Tests", True, "Tests generated successfully")
+                    return True
+                else:
+                    self.log_result("AI Generate Tests", False, "Missing success or tests in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("AI Generate Tests", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("AI Generate Tests", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    # =============================================================================
+    # TEMPLATE TESTS
+    # =============================================================================
+    
+    def test_get_templates(self):
+        """Test get templates endpoint"""
+        response = self.make_request("GET", "/templates/")
+        
+        if response is None:
+            self.log_result("Get Templates", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, list):
+                    self.log_result("Get Templates", True, f"Retrieved {len(result)} templates")
+                    return True
+                else:
+                    self.log_result("Get Templates", False, "Response is not a list", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Get Templates", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Get Templates", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_get_featured_templates(self):
+        """Test get featured templates endpoint"""
+        response = self.make_request("GET", "/templates/featured")
+        
+        if response is None:
+            self.log_result("Get Featured Templates", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, list):
+                    self.log_result("Get Featured Templates", True, f"Retrieved {len(result)} featured templates")
+                    return True
+                else:
+                    self.log_result("Get Featured Templates", False, "Response is not a list", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Get Featured Templates", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Get Featured Templates", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_get_template_categories(self):
+        """Test get template categories endpoint"""
+        response = self.make_request("GET", "/templates/categories")
+        
+        if response is None:
+            self.log_result("Get Template Categories", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                self.log_result("Get Template Categories", True, f"Retrieved categories: {result}")
+                return True
+            except json.JSONDecodeError:
+                self.log_result("Get Template Categories", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Get Template Categories", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_search_templates(self):
+        """Test template search endpoint"""
+        params = {"q": "react"}
+        response = self.make_request("GET", "/templates/search", params=params)
+        
+        if response is None:
+            self.log_result("Search Templates", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, list):
+                    self.log_result("Search Templates", True, f"Found {len(result)} templates for 'react'")
+                    return True
+                else:
+                    self.log_result("Search Templates", False, "Response is not a list", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Search Templates", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Search Templates", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    # =============================================================================
+    # PROJECT TESTS
+    # =============================================================================
+    
+    def test_create_project(self):
+        """Test project creation endpoint"""
+        if not self.auth_token:
+            self.log_result("Create Project", False, "No auth token available")
+            return False
+        
+        data = {
+            "name": f"Test Project {int(time.time())}",
+            "description": "A test project created by automated testing",
+            "initial_prompt": "Create a simple web application"
+        }
+        
+        response = self.make_request("POST", "/projects/", data)
+        
+        if response is None:
+            self.log_result("Create Project", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "id" in result and "name" in result:
+                    self.test_project_id = result["id"]
+                    self.log_result("Create Project", True, f"Project created with ID: {self.test_project_id}")
+                    return True
+                else:
+                    self.log_result("Create Project", False, "Missing id or name in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Create Project", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Create Project", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_get_projects(self):
+        """Test get projects endpoint"""
+        if not self.auth_token:
+            self.log_result("Get Projects", False, "No auth token available")
+            return False
+        
+        response = self.make_request("GET", "/projects/")
+        
+        if response is None:
+            self.log_result("Get Projects", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if isinstance(result, list):
+                    self.log_result("Get Projects", True, f"Retrieved {len(result)} projects")
+                    return True
+                else:
+                    self.log_result("Get Projects", False, "Response is not a list", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Get Projects", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Get Projects", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_get_project_by_id(self):
+        """Test get project by ID endpoint"""
+        if not self.test_project_id:
+            self.log_result("Get Project By ID", False, "No test project ID available")
+            return False
+        
+        response = self.make_request("GET", f"/projects/{self.test_project_id}")
+        
+        if response is None:
+            self.log_result("Get Project By ID", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "id" in result and result["id"] == self.test_project_id:
+                    self.log_result("Get Project By ID", True, f"Retrieved project: {result['name']}")
+                    return True
+                else:
+                    self.log_result("Get Project By ID", False, "Project ID mismatch or missing", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Get Project By ID", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Get Project By ID", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_update_project(self):
+        """Test project update endpoint"""
+        if not self.test_project_id or not self.auth_token:
+            self.log_result("Update Project", False, "No test project ID or auth token available")
+            return False
+        
+        data = {
+            "description": "Updated description from automated test"
+        }
+        
+        response = self.make_request("PUT", f"/projects/{self.test_project_id}", data)
+        
+        if response is None:
+            self.log_result("Update Project", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "id" in result and "description" in result:
+                    self.log_result("Update Project", True, "Project updated successfully")
+                    return True
+                else:
+                    self.log_result("Update Project", False, "Missing id or description in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Update Project", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Update Project", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_fork_project(self):
+        """Test project forking endpoint"""
+        if not self.test_project_id or not self.auth_token:
+            self.log_result("Fork Project", False, "No test project ID or auth token available")
+            return False
+        
+        response = self.make_request("POST", f"/projects/{self.test_project_id}/fork")
+        
+        if response is None:
+            self.log_result("Fork Project", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "id" in result and result["id"] != self.test_project_id:
+                    self.log_result("Fork Project", True, f"Project forked with new ID: {result['id']}")
+                    return True
+                else:
+                    self.log_result("Fork Project", False, "Fork failed or same ID returned", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Fork Project", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Fork Project", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    # =============================================================================
+    # DEPLOYMENT TESTS
+    # =============================================================================
+    
+    def test_deploy_project(self):
+        """Test project deployment endpoint"""
+        if not self.test_project_id or not self.auth_token:
+            self.log_result("Deploy Project", False, "No test project ID or auth token available")
+            return False
+        
+        data = {
+            "project_id": self.test_project_id,
+            "subdomain": f"test-{int(time.time())}"
+        }
+        
+        response = self.make_request("POST", "/deploy/", data)
+        
+        if response is None:
+            self.log_result("Deploy Project", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result or "deployment_url" in result:
+                    self.log_result("Deploy Project", True, "Project deployment initiated")
+                    return True
+                else:
+                    self.log_result("Deploy Project", False, "Unexpected response format", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Deploy Project", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Deploy Project", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_get_deployment_status(self):
+        """Test deployment status endpoint"""
+        if not self.test_project_id:
+            self.log_result("Get Deployment Status", False, "No test project ID available")
+            return False
+        
+        response = self.make_request("GET", f"/deploy/{self.test_project_id}/status")
+        
+        if response is None:
+            self.log_result("Get Deployment Status", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                self.log_result("Get Deployment Status", True, f"Deployment status: {result}")
+                return True
+            except json.JSONDecodeError:
+                self.log_result("Get Deployment Status", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Get Deployment Status", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    # =============================================================================
+    # CHAT TESTS
+    # =============================================================================
+    
+    def test_add_chat_message(self):
+        """Test add chat message endpoint"""
+        data = {
+            "type": "user",
+            "content": "Hello, this is a test message"
+        }
+        
+        response = self.make_request("POST", f"/chat/{self.test_session_id}", data)
+        
+        if response is None:
+            self.log_result("Add Chat Message", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result and result["success"]:
+                    self.log_result("Add Chat Message", True, "Chat message added successfully")
+                    return True
+                else:
+                    self.log_result("Add Chat Message", False, "Message not added successfully", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Add Chat Message", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Add Chat Message", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    def test_get_chat_history(self):
+        """Test get chat history endpoint"""
+        response = self.make_request("GET", f"/chat/{self.test_session_id}")
+        
+        if response is None:
+            self.log_result("Get Chat History", False, "Request failed")
+            return False
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                if "success" in result and "messages" in result:
+                    self.log_result("Get Chat History", True, f"Retrieved {len(result['messages'])} messages")
+                    return True
+                else:
+                    self.log_result("Get Chat History", False, "Missing success or messages in response", result)
+                    return False
+            except json.JSONDecodeError:
+                self.log_result("Get Chat History", False, "Invalid JSON response", response.text)
+                return False
+        else:
+            self.log_result("Get Chat History", False, f"Status: {response.status_code}", response.text)
+            return False
+    
+    # =============================================================================
+    # MAIN TEST RUNNER
+    # =============================================================================
+    
+    def run_all_tests(self):
+        """Run all API tests"""
+        print("🚀 Starting Lovable Clone API Test Suite")
+        print(f"🔗 Testing against: {self.base_url}")
+        print("=" * 60)
+        
+        # Test API root
+        response = self.make_request("GET", "/")
+        if response and response.status_code == 200:
+            self.log_result("API Root", True, "API is online")
+        else:
+            self.log_result("API Root", False, "API is not responding")
+        
+        # Authentication Tests
+        print("\n🔐 Testing Authentication System...")
+        self.test_user_registration()
+        self.test_user_login()
+        self.test_get_current_user()
+        self.test_protected_route_without_auth()
+        
+        # AI Service Tests
+        print("\n🤖 Testing AI Services...")
+        self.test_ai_generate_code()
+        self.test_ai_improve_code()
+        self.test_ai_generate_tests()
+        
+        # Template Tests
+        print("\n📋 Testing Template System...")
+        self.test_get_templates()
+        self.test_get_featured_templates()
+        self.test_get_template_categories()
+        self.test_search_templates()
+        
+        # Project Tests
+        print("\n📁 Testing Project Management...")
+        self.test_create_project()
+        self.test_get_projects()
+        self.test_get_project_by_id()
+        self.test_update_project()
+        self.test_fork_project()
+        
+        # Deployment Tests
+        print("\n🚀 Testing Deployment System...")
+        self.test_deploy_project()
+        self.test_get_deployment_status()
+        
+        # Chat Tests
+        print("\n💬 Testing Chat System...")
+        self.test_add_chat_message()
+        self.test_get_chat_history()
+        
+        # Cleanup - Delete test project
+        if self.test_project_id and self.auth_token:
+            print("\n🧹 Cleaning up test data...")
+            response = self.make_request("DELETE", f"/projects/{self.test_project_id}")
+            if response and response.status_code == 200:
+                self.log_result("Cleanup - Delete Project", True, "Test project deleted")
+            else:
+                self.log_result("Cleanup - Delete Project", False, "Failed to delete test project")
+        
+        # Print final results
+        print("\n" + "=" * 60)
+        print("📊 TEST RESULTS SUMMARY")
+        print("=" * 60)
+        print(f"Total Tests: {self.results['total_tests']}")
+        print(f"✅ Passed: {self.results['passed']}")
+        print(f"❌ Failed: {self.results['failed']}")
+        print(f"Success Rate: {(self.results['passed']/self.results['total_tests']*100):.1f}%")
+        
+        if self.results['errors']:
+            print("\n🔍 FAILED TESTS DETAILS:")
+            print("-" * 40)
+            for error in self.results['errors']:
+                print(f"❌ {error['test']}: {error['message']}")
+                if error['response']:
+                    print(f"   Response: {str(error['response'])[:200]}...")
+                print()
+        
+        return self.results['failed'] == 0
+
+if __name__ == "__main__":
+    tester = LovableCloneAPITester()
+    success = tester.run_all_tests()
+    
+    if success:
+        print("🎉 All tests passed!")
+        sys.exit(0)
+    else:
+        print("💥 Some tests failed!")
+        sys.exit(1)
