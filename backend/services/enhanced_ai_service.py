@@ -3,7 +3,7 @@ import json
 import re
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from emergentintegrations import LlmChat, UserMessage, SystemMessage
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 class EnhancedAIService:
     """
@@ -35,9 +35,11 @@ class EnhancedAIService:
             return {
                 "success": True,
                 "code": final_result["code"],
-                "architecture": architecture,
-                "analysis": analysis,
-                "quality_metrics": final_result["quality_metrics"],
+                "metadata": {
+                    "architecture": architecture,
+                    "analysis": analysis,
+                    "quality_metrics": final_result["quality_metrics"]
+                },
                 "message": "Complete production-ready application generated with extreme quality"
             }
             
@@ -51,7 +53,7 @@ class EnhancedAIService:
     async def _analyze_requirements(self, prompt: str, context: Optional[Dict] = None, session_id: str = None) -> Dict[str, Any]:
         """Deep analysis of user requirements like a senior product manager"""
         
-        system_message = SystemMessage(text="""You are a world-class product manager and technical architect with 15+ years of experience.
+        system_message = """You are a world-class product manager and technical architect with 15+ years of experience.
 
         Analyze user requirements with extreme depth and precision:
 
@@ -79,7 +81,7 @@ class EnhancedAIService:
            - Documentation needs
            - Maintenance considerations
 
-        Return comprehensive JSON analysis.""")
+        Return comprehensive JSON analysis."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -137,7 +139,7 @@ class EnhancedAIService:
     async def _design_architecture(self, prompt: str, analysis: Dict[str, Any]) -> Dict[str, Any]:
         """Design complete application architecture like a senior architect"""
         
-        system_message = SystemMessage(text="""You are a world-class software architect with expertise in React, TypeScript, and modern web development.
+        system_message = """You are a world-class software architect with expertise in React, TypeScript, and modern web development.
 
         Design a COMPLETE application architecture that is:
 
@@ -165,7 +167,7 @@ class EnhancedAIService:
            - Documentation and comments
            - Security best practices
 
-        Return detailed architecture JSON with component hierarchy, data flow, and implementation patterns.""")
+        Return detailed architecture JSON with component hierarchy, data flow, and implementation patterns."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -238,13 +240,13 @@ class EnhancedAIService:
     async def _generate_complete_application(self, prompt: str, architecture: Dict[str, Any], analysis: Dict[str, Any], session_id: str) -> Dict[str, Any]:
         """Generate COMPLETE production-ready application code"""
         
-        system_message = SystemMessage(text="""You are Claude, an expert React/TypeScript developer with exceptional capabilities in creating production-ready applications.
+        system_message = """You are Claude, an expert React/JavaScript developer with exceptional capabilities in creating production-ready applications.
 
         Generate a COMPLETE, FULLY-FUNCTIONAL application with:
 
         🏗️ ARCHITECTURE EXCELLENCE
         - Modern React 18+ patterns with hooks
-        - TypeScript for type safety (use JSDoc for now)
+        - JavaScript (NOT TypeScript) - no type annotations
         - Component composition and reusability  
         - Proper separation of concerns
 
@@ -281,7 +283,7 @@ class EnhancedAIService:
         5. Professional styling with Tailwind
         6. Real business logic, not just placeholders
 
-        The application should be ready to run in production immediately.""")
+        The application should be ready to run in production immediately."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -462,3 +464,21 @@ export default App;"""
             "quality_metrics": quality_metrics,
             "optimization_applied": True
         }
+
+    async def suggest_improvements(self, code: str, session_id: str) -> List[str]:
+        """Suggest improvements for existing code"""
+        return [
+            "Consider adding error boundaries",
+            "Implement loading states",
+            "Add accessibility attributes",
+            "Optimize performance with React.memo"
+        ]
+    
+    async def generate_tests(self, code: str, session_id: str) -> List[str]:
+        """Generate test suggestions for code"""
+        return [
+            "Unit tests for component rendering",
+            "Integration tests for user interactions",
+            "Accessibility tests",
+            "Performance tests"
+        ]

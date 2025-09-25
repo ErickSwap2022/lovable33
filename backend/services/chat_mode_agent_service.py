@@ -3,7 +3,7 @@ import json
 import re
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from emergentintegrations import LlmChat, UserMessage, SystemMessage
+from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 class ChatModeAgentService:
     """
@@ -81,7 +81,7 @@ class ChatModeAgentService:
     async def _handle_debugging_query(self, query: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
         """Handle debugging queries with multi-step reasoning"""
         
-        system_message = SystemMessage(text="""You are a senior software engineer and debugging expert.
+        system_message = """You are a senior software engineer and debugging expert.
         
         Help users debug issues through multi-step reasoning:
         1. Understand the problem
@@ -91,7 +91,7 @@ class ChatModeAgentService:
         
         DO NOT edit or generate code - only provide guidance, explanations, and debugging strategies.
         
-        Be thorough, methodical, and educational in your approach.""")
+        Be thorough, methodical, and educational in your approach."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -134,7 +134,7 @@ class ChatModeAgentService:
     async def _handle_planning_query(self, query: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
         """Handle project planning and architecture queries"""
         
-        system_message = SystemMessage(text="""You are a senior technical architect and project planner.
+        system_message = """You are a senior technical architect and project planner.
         
         Help users plan and structure their projects through strategic thinking:
         1. Break down complex requirements
@@ -142,7 +142,7 @@ class ChatModeAgentService:
         3. Identify potential challenges
         4. Recommend best practices
         
-        Provide guidance without writing actual code - focus on planning and strategy.""")
+        Provide guidance without writing actual code - focus on planning and strategy."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -234,7 +234,7 @@ class ChatModeAgentService:
     async def _handle_log_analysis_query(self, query: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
         """Handle log analysis queries"""
         
-        system_message = SystemMessage(text="""You are an expert in log analysis and system monitoring.
+        system_message = """You are an expert in log analysis and system monitoring.
         
         Analyze logs to help identify issues, patterns, and solutions:
         1. Parse log entries for errors and warnings
@@ -242,7 +242,7 @@ class ChatModeAgentService:
         3. Suggest investigation paths
         4. Recommend monitoring improvements
         
-        Provide insights without writing code - focus on analysis and interpretation.""")
+        Provide insights without writing code - focus on analysis and interpretation."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -289,7 +289,7 @@ class ChatModeAgentService:
     async def _handle_database_query(self, query: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
         """Handle database-related queries"""
         
-        system_message = SystemMessage(text="""You are a database expert and SQL consultant.
+        system_message = """You are a database expert and SQL consultant.
         
         Help users understand and work with databases:
         1. Explain database concepts
@@ -297,7 +297,7 @@ class ChatModeAgentService:
         3. Help with data modeling
         4. Provide best practices
         
-        Guide without writing actual SQL - focus on explanation and strategy.""")
+        Guide without writing actual SQL - focus on explanation and strategy."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -335,7 +335,7 @@ class ChatModeAgentService:
     async def _handle_explanation_query(self, query: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
         """Handle explanation and educational queries"""
         
-        system_message = SystemMessage(text="""You are an expert technical educator and mentor.
+        system_message = """You are an expert technical educator and mentor.
         
         Explain complex concepts in clear, understandable ways:
         1. Break down complex topics
@@ -343,7 +343,7 @@ class ChatModeAgentService:
         3. Provide context and background
         4. Suggest learning resources
         
-        Focus on education and understanding rather than code implementation.""")
+        Focus on education and understanding rather than code implementation."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -380,10 +380,10 @@ class ChatModeAgentService:
     async def _handle_general_query(self, query: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
         """Handle general queries"""
         
-        system_message = SystemMessage(text="""You are a helpful AI assistant specializing in web development and software engineering.
+        system_message = """You are a helpful AI assistant specializing in web development and software engineering.
         
         Provide helpful, accurate information and guidance while being conversational and supportive.
-        Focus on helping users learn and understand rather than just providing answers.""")
+        Focus on helping users learn and understand rather than just providing answers."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -421,7 +421,7 @@ class ChatModeAgentService:
     async def multi_step_reasoning(self, problem: str, context: Dict[str, Any], session_id: str) -> Dict[str, Any]:
         """Perform multi-step reasoning for complex problems"""
         
-        system_message = SystemMessage(text="""You are an expert problem solver with advanced reasoning capabilities.
+        system_message = """You are an expert problem solver with advanced reasoning capabilities.
         
         Break down complex problems into steps:
         1. Problem decomposition
@@ -430,7 +430,7 @@ class ChatModeAgentService:
         4. Solution synthesis
         5. Validation and alternatives
         
-        Think step by step and show your reasoning process.""")
+        Think step by step and show your reasoning process."""
         
         chat = LlmChat(
             api_key=self.api_key,
@@ -456,10 +456,20 @@ class ChatModeAgentService:
         
         response = await chat.send_message(UserMessage(text=reasoning_prompt))
         
+        # Parse reasoning steps from response
+        reasoning_steps = []
+        step_pattern = r'Step \d+:.*?(?=Step \d+:|$)'
+        matches = re.findall(step_pattern, response.text, re.DOTALL)
+        
+        for match in matches:
+            reasoning_steps.append(match.strip())
+        
         return {
             "success": True,
             "type": "multi_step_reasoning",
             "problem": problem,
-            "reasoning_chain": response.text,
+            "reasoning_steps": reasoning_steps,
+            "solution": response.text,
+            "analysis": f"Multi-step analysis completed with {len(reasoning_steps)} reasoning steps",
             "context_used": context
         }
